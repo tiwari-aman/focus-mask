@@ -1,210 +1,121 @@
-# 🎯 Focus Mask
+# Focus Mask
 
-### **Stay Focused. Block Distractions. Get More Done.**
+A Chrome extension that enhances focus and concentration by allowing users to blur and darken areas outside their selected focus region on any webpage.
 
-Focus Mask is a powerful Chrome extension that helps you concentrate on what matters by blurring and darkening everything outside your selected areas. Perfect for reading articles, studying, working on specific content, or reducing visual clutter on any webpage.
+## Features
 
----
+- **Draw Focus Areas** – Select rectangular regions to keep in focus
+- **Adjustable Blur** – Control blur intensity (0–20px)
+- **Darkness Control** – Adjust overlay darkness (0–100%)
+- **Block Clicks Outside** – Prevent accidental interaction with unfocused content
+- **Floating Toolbar** – Collapsible, draggable control panel
+- **Resize & Reposition** – Modify focus areas dynamically
+- **Persistent Settings** – Automatically saves preferences across sessions
+- **Per-Tab Configuration** – Independent settings for each tab
 
-## ✨ Key Features
+## Installation
 
-| Feature                     | Description                                                                 |
-| --------------------------- | --------------------------------------------------------------------------- |
-| 🎨 **Draw Focus Areas**     | Simply click and drag to select any rectangular region you want to focus on |
-| 🌫️ **Adjustable Blur**      | Control blur intensity from subtle (0px) to heavy (20px)                    |
-| 🌑 **Darkness Control**     | Adjust how dark the unfocused areas appear (0-100%)                         |
-| 🚫 **Block Clicks Outside** | Prevent accidental clicks on distracting content                            |
-| 🔧 **Floating Toolbar**     | Collapsible, draggable toolbar for quick access to controls                 |
-| ↔️ **Resize & Move Areas**  | Drag corners to resize, drag center to reposition                           |
-| 💾 **Auto-Save**            | Your settings persist across sessions                                       |
-| ⚡ **Per-Tab Settings**     | Different focus areas for different tabs                                    |
+1. Clone or download the repository
+2. Navigate to `chrome://extensions/` in Chrome
+3. Enable **Developer mode** (top right toggle)
+4. Click **Load unpacked** and select the project root directory
+5. The extension will appear in your Chrome toolbar
 
----
+## Usage
 
-## 🖼️ How It Works
+### Activating the Overlay
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  🌫️ Blurred & Darkened Area (Distractions Hidden)          │
-│  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│  ░░░░░░┌─────────────────────────────────┐░░░░░░░░░░░░░░░░  │
-│  ░░░░░░│                                 │░░░░░░░░░░░░░░░░  │
-│  ░░░░░░│   ✨ YOUR FOCUS AREA ✨          │░░░░░░░░░░░░░░░░  │
-│  ░░░░░░│   Crystal clear content         │░░░░░░░░░░░░░░░░  │
-│  ░░░░░░│   that you want to focus on     │░░░░░░░░░░░░░░░░  │
-│  ░░░░░░│                                 │░░░░░░░░░░░░░░░░  │
-│  ░░░░░░└─────────────────────────────────┘░░░░░░░░░░░░░░░░  │
-│  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-└─────────────────────────────────────────────────────────────┘
-```
+1. Click the Focus Mask icon in your toolbar
+2. Toggle **Enable Focus Mask** in the popup
+3. Click the **Draw** button in the floating toolbar
+4. Drag to create your focus area
 
----
+### Managing Focus Areas
 
-## 🚀 Quick Start
+- **Resize** – Drag corner handles
+- **Reposition** – Drag from the center
+- **Delete** – Hover and click the remove button
 
-### Installation
+### Adjusting Settings
 
-1. **Download** the extension files
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable **Developer mode** (toggle in top right)
-4. Click **Load unpacked** and select the `dist` folder
-5. Pin the extension to your toolbar for easy access 📌
+Use the popup to control:
+- **Blur Intensity** – How blurred the unfocused areas appear (0–20px)
+- **Darkness Level** – Overlay opacity (0–100%)
+- **Block Clicks Outside** – Enable/disable click blocking
 
-### Basic Usage
+## Permissions
 
-1. **Click** the Focus Mask icon in your Chrome toolbar
-2. **Toggle** "Enable Focus Mask" to activate
-3. **Click** the ✏️ Draw button in the floating toolbar
-4. **Drag** to create your focus area
-5. **Adjust** blur and darkness to your preference
+The extension requests the following permissions:
 
----
+| Permission       | Purpose                                                    |
+|------------------|------------------------------------------------------------|
+| `storage`        | Persist user preferences (blur, darkness, enabled state)  |
+| `scripting`      | Inject overlay and toolbar scripts into webpages          |
+| `activeTab`      | Access the active tab when user activates the extension   |
+| `<all_urls>`     | Apply overlay to any accessible webpage                    |
 
-## 🎮 Controls
-
-### Floating Toolbar
-
-| Button         | Action                                   |
-| -------------- | ---------------------------------------- |
-| ✏️ Draw        | Enter drawing mode to create focus areas |
-| 🗑️ Clear       | Remove all focus areas                   |
-| ◀ Collapse     | Minimize toolbar to save space           |
-| ⋮⋮ Drag Handle | Move toolbar anywhere on the page        |
-
-### Focus Area Actions
-
-| Action     | How To                                |
-| ---------- | ------------------------------------- |
-| **Delete** | Hover over area → Click ✕ button      |
-| **Resize** | Hover over area → Drag corner handles |
-| **Move**   | Hover over area → Drag from center    |
-
-### Popup Settings
-
-| Setting                 | Description                                    |
-| ----------------------- | ---------------------------------------------- |
-| **Enable Focus Mask**   | Turn the extension on/off for current page     |
-| **Blur Intensity**      | How blurry the unfocused areas appear (0-20px) |
-| **Darkness Level**      | How dark the unfocused areas appear (0-100%)   |
-| **Block Click Outside** | Prevent clicks in blurred areas                |
-
----
-
-## 💡 Use Cases
-
-### 📚 **Reading & Studying**
-
-Focus on articles, research papers, or textbook content without sidebar distractions
-
-### 💻 **Coding & Development**
-
-Highlight specific code sections during reviews or pair programming
-
-### 📊 **Presentations & Demos**
-
-Draw attention to specific parts of a webpage during screen sharing
-
-### 🎯 **Productivity**
-
-Block distracting elements while working on focused tasks
-
-### 🧘 **Reduced Visual Clutter**
-
-Create a calmer browsing experience by hiding unnecessary content
-
----
-
-## ⚙️ Settings Explained
-
-### Blur Intensity (0-100%)
-
-- **0%**: No blur, just darkened
-- **25%**: Light blur (default) - subtle focus effect
-- **75%**: Medium blur - noticeable separation
-- **100%**: Heavy blur - maximum distraction blocking
-
-### Darkness Level (0-100%)
-
-- **0%**: Transparent overlay
-- **50%**: Medium darkness (default)
-- **100%**: Completely black outside focus areas
-
-### Block Click Outside
-
-When enabled:
-
-- ✅ Clicks inside focus areas work normally
-- ✅ Scrolling inside focus areas works
-- ❌ Clicks outside focus areas are blocked
-- ❌ Scrolling outside focus areas is blocked
-
----
-
-## 🔧 Troubleshooting
-
-| Issue                         | Solution                                                |
-| ----------------------------- | ------------------------------------------------------- |
-| Extension not working         | Check you're not on a restricted page (chrome://, etc.) |
-| Overlay not appearing         | Toggle Enable in popup, refresh page                    |
-| Performance issues            | Reduce blur intensity or clear some areas               |
-| Areas misaligned after scroll | Focus areas use fixed positioning - this is by design   |
-
----
-
-## ⚠️ Limitations
+## Limitations
 
 - Cannot run on Chrome internal pages (`chrome://`, `chrome-extension://`)
 - Cannot run on Chrome Web Store pages
-- Heavy blur on large areas may impact performance on older devices
-- One focus area at a time (single area mode)
+- Single focus area per page (non-overlapping regions)
 
----
+## Development
 
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js 16+
-- npm
-
-### Build Commands
+### Setup
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Development build (with watch)
-npm run dev
+### Build
 
-# Production build
+```bash
 npm run build
+```
+
+### Development Mode
+
+```bash
+npm run dev
 ```
 
 ### Project Structure
 
 ```
 src/
-├── popup/          # Extension popup UI (React)
-├── content/        # Page overlay & toolbar (React)
-├── background/     # Service worker
-├── assets/         # Icons
-└── manifest.json   # Extension config
+├── manifest.json                    # Extension configuration and permissions
+├── background/
+│   └── index.js                     # Service worker for background tasks
+├── popup/                           # Extension popup UI (React)
+│   ├── index.jsx                    # Popup entry point
+│   ├── App.jsx                      # Main popup component
+│   ├── popup.html                   # Popup HTML template
+│   ├── components/
+│   │   ├── Header.jsx               # Popup header with status
+│   │   ├── ActionButtons.jsx        # Enable/disable buttons
+│   │   ├── SliderSection.jsx        # Blur and darkness controls
+│   │   ├── ToggleSection.jsx        # Block clicks toggle
+│   │   └── StatusBar.jsx            # Status information display
+│   └── styles/
+│       └── popup.css                # Popup styling
+├── content/                         # Page overlay and toolbar (React)
+│   ├── index.jsx                    # Content script entry point
+│   ├── FocusMaskApp.jsx             # Main overlay component
+│   ├── FocusMaskAppSingle.jsx       # Single focus area mode
+│   ├── components/
+│   │   ├── Toolbar.jsx              # Floating toolbar with controls
+│   │   ├── DrawingArea.jsx          # Drawing mode handler
+│   │   └── MaskOverlay.jsx          # Blur and darkness overlay
+│   ├── hooks/
+│   │   └── useClickBlocking.js      # Hook for blocking outside clicks
+│   └── styles/
+│       └── content.css              # Overlay and toolbar styling
+└── assets/                          # Icons and extension resources
 ```
 
----
+## Technology Stack
 
-## 📝 License
-
-MIT License - Free to use and modify
-
----
-
-<div align="center">
-
-**Made with ❤️ for focused productivity**
-
-_Stop getting distracted. Start focusing._
-
-</div>
+- **React** – UI components
+- **Chrome Extension API** – Extension functionality
+- **CSS** – Styling and overlay effects
