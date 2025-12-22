@@ -119,3 +119,9 @@ src/
 - **React** – UI components
 - **Chrome Extension API** – Extension functionality
 - **CSS** – Styling and overlay effects
+
+## Demo
+
+[![Focus Mask Demo](https://img.youtube.com/vi/M6nZPy7N4Tk/0.jpg)](https://youtu.be/M6nZPy7N4Tk)
+
+
