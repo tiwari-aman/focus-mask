@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+:root {
+  /* Premium SaaS Palette - Deep Atmospheric Blues */
+  --bg-base: #030610;       /* Near-black with subtle cool undertone */
+  --bg-layer: #0B1021;      /* Slightly lighter deep blue */
+  
+  /* Text System - High Contrast & Calm */
+  --text-primary: #F1F5F9;  /* Off-white (Slate 50) */
+  --text-secondary: #94A3B8; /* Muted cool gray (Slate 400) */
+  --text-tertiary: #64748B;  /* De-emphasized text */
+
+  /* Product Blue - Tint usage mainly */
+  --primary: #3B82F6;
+  --primary-glow: rgba(59, 130, 246, 0.15);
+  
+  /* Glassmorphism Tokens */
+  --glass-surface: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.03); 
+}
+
+@theme inline {
+  --color-text-main: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
+  --color-background-base: var(--bg-base);
+  --color-primary: var(--primary);
+  
+  --color-glass-surface: var(--glass-surface);
+  --color-glass-border: var(--glass-border);
+}
+
+body {
+  background-color: var(--bg-base);
+  /* "Atmospheric" Background: Deep base + subtle radial glow at top */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-base) 0%, #060B1A 100%);
+  color: var(--text-primary);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Typography Utilities */
+h1, h2, h3 {
+  letter-spacing: -0.025em; /* Tight, modern headings */
+}
+
+/* Animated Premium Button (Blue Theme) */
+.btn-animated {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 140px;
+  height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #2563EB, #06B6D4, #2563EB, #2563EB, #06B6D4, #2563EB);
+  background-size: 250%;
+  background-position: left;
+  color: #60A5FA;
+  cursor: pointer;
+  transition: all 0.6s ease;
+  padding: 1.5px; /* Creates the border width */
+  text-decoration: none;
+  /* Reduced shadow to avoid "blue background" look, only subtle glow */
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.1);
+}
+
+.btn-animated:hover {
+  background-position: right;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.btn-animated:active {
+  transform: scale(0.95);
+}
+
+.btn-animated-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background-color: #030610; /* Strict dark theme background */
+  color: #fff;
+  font-weight: 600;
+  padding: 0 24px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-animated:hover .btn-animated-content {
+  background-color: #030610; /* Keep strictly dark on hover */
+  color: #fff;
+}
+
+/* Glass Card with Hover Gradient Border - Blue/Cyan */
+.glass-card-hover {
+  position: relative;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  transition: all 0.4s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.glass-card-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 2px; /* Border width on hover */
+  /* Exact gradient match to button */
+  background: linear-gradient(90deg, #2563EB, #06B6D4, #2563EB, #2563EB, #06B6D4, #2563EB);
+  background-size: 250% 100%;
+  background-position: 0% 0%;
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease, background-position 0.6s ease; /* Match button transition speed */
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-card-hover:hover::before {
+  opacity: 1;
+  background-position: 100% 0%;
+}
+
+.glass-card-hover:hover {
+  background: rgba(15, 23, 42, 0.6);
+  /* Add matching colored glow */
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+  transform: translateY(-4px);
+  border-color: transparent; /* Hide original border */
+}
+
