@@ -1,19 +1,39 @@
-// Focus Mask Background (Cross-browser)
+// Focus Mask Background Service Worker (Cross-browser compatible)
+// 
+// STATE ARCHITECTURE:
+// This service worker maintains two types of state:
+// 
+// 1. GLOBAL SETTINGS (persisted in chrome.storage.local):
+//    - blur: Blur intensity (0-20px)
+//    - darkness: Overlay darkness (0-1)
+//    - blockInteraction: Whether to block clicks outside focus areas
+//    These are shared across all tabs and persist across sessions
+// 
+// 2. PER-TAB STATE (in-memory Map):
+//    - enabled: Whether Focus Mask is active on this specific tab
+//    - areas: Array of focus area definitions for this tab
+//    - drawMode: Whether the user is currently drawing a new area
+//    These are tab-specific and reset when the tab is closed
 
 import browser from "webextension-polyfill";
 
-// Default global settings
+// Default global settings (applied on install and used as fallback)
 const DEFAULT_SETTINGS = {
   blur: 5,
   darkness: 0.5,
   blockInteraction: false,
+  toolbarEnabled: true,
 };
 
-// Per-tab state (in-memory)
+// Per-tab state storage (in-memory, does not persist across browser restarts)
 const tabStates = new Map();
 
 /* ------------------ TAB STATE HELPERS ------------------ */
 
+/**
+ * Get the current state for a specific tab
+ * If no state exists, initializes with default values
+ */
 function getTabState(tabId) {
   if (!tabStates.has(tabId)) {
     tabStates.set(tabId, {
@@ -25,6 +45,10 @@ function getTabState(tabId) {
   return tabStates.get(tabId);
 }
 
+/**
+ * Update the state for a specific tab
+ * Merges new state with existing state
+ */
 function setTabState(tabId, state) {
   const current = getTabState(tabId);
   tabStates.set(tabId, { ...current, ...state });
@@ -44,30 +68,44 @@ browser.runtime.onInstalled.addListener(() => {
 
 /* ------------------ MESSAGE HANDLER ------------------ */
 
+/**
+ * Central message handler for communication between popup, content scripts, and background
+ * 
+ * Handles the following actions:
+ * - injectContentScript: Inject the overlay into a tab
+ * - getState/getTabState: Retrieve combined global + per-tab state
+ * - setState: Save global settings and/or per-tab state
+ * - toggleExtension: Enable/disable extension on a specific tab
+ */
 browser.runtime.onMessage.addListener((message, sender) => {
   const tabId = message.tabId || sender.tab?.id;
 
   if (!tabId) return;
 
+  // Inject content script into specified tab
   if (message.action === "injectContentScript") {
     injectContentScript(tabId);
     return Promise.resolve({ success: true });
   }
 
+  // Get combined state: global settings + per-tab state
   if (message.action === "getState" || message.action === "getTabState") {
     return browser.storage.local.get(DEFAULT_SETTINGS).then((globals) => {
       const tabState = getTabState(tabId);
-      return { ...globals, ...tabState };
+      return { ...globals, ...tabState }; // Tab state overrides globals
     });
   }
 
+  // Save state: separate global settings from per-tab state
   if (message.action === "setState") {
     const { enabled, areas, drawMode, ...globalState } = message.state || {};
 
+    // Save global settings to persistent storage
     if (Object.keys(globalState).length) {
       browser.storage.local.set(globalState);
     }
 
+    // Update per-tab state in memory
     const tabUpdate = {};
     if (enabled !== undefined) tabUpdate.enabled = enabled;
     if (areas !== undefined) tabUpdate.areas = areas;
@@ -80,6 +118,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
     return Promise.resolve({ success: true });
   }
 
+  // Toggle extension on/off for a specific tab
   if (message.action === "toggleExtension") {
     toggleExtension(tabId);
     return Promise.resolve({ success: true });

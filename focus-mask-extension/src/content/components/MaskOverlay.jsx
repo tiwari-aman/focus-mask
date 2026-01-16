@@ -1,10 +1,10 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 
-function MaskOverlay({ areas, blur, darkness, onRemoveArea, onResizeArea }) {
+function MaskOverlay({ areas, previewArea, blur, darkness, onRemoveArea, onResizeArea }) {
   return (
     <>
       <div className="focusmask-mask-overlay">
-        <BlurOverlay areas={areas} blur={blur} darkness={darkness} />
+        <BlurOverlay areas={areas} previewArea={previewArea} blur={blur} darkness={darkness} />
       </div>
       <svg className="focusmask-svg">
         {areas.map((area, index) => (
@@ -21,34 +21,65 @@ function MaskOverlay({ areas, blur, darkness, onRemoveArea, onResizeArea }) {
   );
 }
 
-function BlurOverlay({ areas, blur, darkness }) {
-  const clipPath = useMemo(() => {
-    if (areas.length === 0) return "none";
+function BlurOverlay({ areas, previewArea, blur, darkness }) {
+  // Combine areas and previewArea (if exists) for the cutouts
+  const allAreas = useMemo(() => {
+    return previewArea ? [...areas, previewArea] : areas;
+  }, [areas, previewArea]);
 
-    let path = "polygon(evenodd, 0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%";
+  // Generate a unique ID for this mask
+  const maskId = useMemo(() => `focusmask-blur-mask-${Math.random().toString(36).substr(2, 9)}`, []);
 
-    areas.forEach((area) => {
-      path += `, ${area.x}px ${area.y}px, ${area.x + area.width}px ${
-        area.y
-      }px, ${area.x + area.width}px ${area.y + area.height}px, ${area.x}px ${
-        area.y + area.height
-      }px, ${area.x}px ${area.y}px`;
-    });
-
-    path += ")";
-    return path;
-  }, [areas]);
+  // Border radius for the cutout corners (matches the outline rx="6")
+  const cornerRadius = 6;
 
   return (
-    <div
-      className="focusmask-blur-section"
-      style={{
-        backgroundColor: `rgba(0, 0, 0, ${darkness})`,
-        backdropFilter: `blur(${blur}px)`,
-        WebkitBackdropFilter: `blur(${blur}px)`,
-        clipPath: clipPath,
-      }}
-    />
+    <>
+      {/* SVG with mask definition */}
+      <svg 
+        style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%', 
+          pointerEvents: 'none',
+          zIndex: 0
+        }}
+      >
+        <defs>
+          <mask id={maskId}>
+            {/* White rectangle covers everything (visible) */}
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            {/* Black rounded rectangles create the transparent cutouts */}
+            {allAreas.map((area, index) => (
+              <rect
+                key={index}
+                x={area.x}
+                y={area.y}
+                width={area.width}
+                height={area.height}
+                rx={cornerRadius}
+                ry={cornerRadius}
+                fill="black"
+              />
+            ))}
+          </mask>
+        </defs>
+      </svg>
+      
+      {/* Blur overlay with SVG mask applied */}
+      <div
+        className="focusmask-blur-section"
+        style={{
+          backgroundColor: `rgba(0, 0, 0, ${darkness})`,
+          backdropFilter: `blur(${blur}px)`,
+          WebkitBackdropFilter: `blur(${blur}px)`,
+          mask: allAreas.length > 0 ? `url(#${maskId})` : 'none',
+          WebkitMask: allAreas.length > 0 ? `url(#${maskId})` : 'none',
+        }}
+      />
+    </>
   );
 }
 

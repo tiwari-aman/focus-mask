@@ -32,8 +32,8 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
     };
 
     const handleBlockedClick = (e) => {
-      // Allow clicks on toolbar
-      if (e.target.closest(".focusmask-toolbar")) return;
+      // Allow clicks on toolbar (new floating toolbar classes)
+      if (e.target.closest(".focusmask-toolbar-container") || e.target.closest(".focusmask-floating-expanded") || e.target.closest(".focusmask-floating-collapsed")) return;
 
       // Allow clicks on any FocusMask SVG elements (delete buttons, resize handles, etc.)
       if (e.target.closest(".focusmask-svg")) return;

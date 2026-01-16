@@ -1,8 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "Focus Mask",
+    "name": "__MSG_appName__",
+    "short_name": "__MSG_appShortName__",
     "version": "1.0.0",
-    "description": "Focus on specific areas of any webpage by blurring and darkening everything else",
+    "description": "__MSG_appDescription__",
+    "default_locale": "en",
     "permissions": [
         "storage",
         "scripting",
@@ -44,7 +46,8 @@
                 "assets/icon32.png",
                 "assets/icon48.png",
                 "assets/icon64.png",
-                "assets/icon128.png"
+                "assets/icon128.png",
+                "assets/focusmasklogo.png"
             ],
             "matches": [
                 "<all_urls>"

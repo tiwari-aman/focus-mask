@@ -15,6 +15,7 @@ const DEFAULT_STATE = {
   blur: 5,
   darkness: 0.5,
   blockInteraction: false,
+  toolbarEnabled: true,
   areas: [],
   drawMode: false,
 };
@@ -90,9 +91,10 @@ function FocusMaskAppSingle() {
   }, [state, updateState]);
 
   // Click blocking hook
+  // Only block interaction if explicitly enabled AND there is at least one focus area
   useClickBlocking(
     state.enabled,
-    state.blockInteraction,
+    state.blockInteraction && state.areas.length > 0,
     state.drawMode,
     state.areas
   );
@@ -117,8 +119,8 @@ function FocusMaskAppSingle() {
     (e) => {
       if (!state.drawMode) return;
 
-      // Prevent drawing if we've reached the limit
-      if (hasReachedLimit) return;
+      // In single mode, allow redrawing (replaces later)
+      // if (hasReachedLimit) return;
 
       const x = e.clientX + window.scrollX;
       const y = e.clientY + window.scrollY;
@@ -171,10 +173,10 @@ function FocusMaskAppSingle() {
   }, [state.enabled, updateState]);
 
   const toggleDrawMode = useCallback(() => {
-    // Don't allow entering draw mode if limit is reached
-    if (!state.drawMode && hasReachedLimit) {
-      return;
-    }
+    // In single mode, we allow drawing to replace the existing area
+    // if (!state.drawMode && hasReachedLimit) {
+    //   return;
+    // }
     updateState({ drawMode: !state.drawMode });
   }, [state.drawMode, updateState, hasReachedLimit]);
 
@@ -230,6 +232,7 @@ function FocusMaskAppSingle() {
       <div className={`focusmask-container ${state.enabled ? "visible" : ""}`}>
         <MaskOverlay
           areas={state.areas}
+          previewArea={currentRect}
           blur={state.blur}
           darkness={state.darkness}
           onRemoveArea={removeArea}
@@ -244,7 +247,7 @@ function FocusMaskAppSingle() {
         />
       </div>
       <Toolbar
-        visible={state.enabled}
+        visible={state.enabled && state.toolbarEnabled}
         enabled={state.enabled}
         drawMode={state.drawMode}
         blur={state.blur}
