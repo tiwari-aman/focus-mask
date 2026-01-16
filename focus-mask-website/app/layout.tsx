@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://focusmask.app"),
+  metadataBase: new URL("https://focus-mask.vercel.app"),
   title: "Focus Mask | Focus on what matters",
   description:
     "Eliminate distractions and focus on specific areas of your screen. The ultimate browser extension for deep work and concentration.",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Focus Mask | Focus on what matters",
     description:
       "Eliminate distractions and focus on specific areas of your screen.",
-    url: "https://focusmask.app",
+    url: "https://focus-mask.vercel.app",
     siteName: "Focus Mask",
     images: [
       {

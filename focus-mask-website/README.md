@@ -2,7 +2,7 @@
 
 The official website for **Focus Mask** - a browser extension that helps you eliminate distractions and focus on specific areas of your screen.
 
-🌐 **Live Site**: [https://focusmask.app](https://focusmask.app)
+🌐 **Live Site**: [https://focus-mask.vercel.app](https://focus-mask.vercel.app)
 
 ## About Focus Mask
 
@@ -76,7 +76,7 @@ focus-mask-website/
 ## Links
 
 - 🧩 **Chrome Web Store**: [Get the Extension](https://chromewebstore.google.com/detail/focus-mask/gebdfpdpijonpofhhoogpifeoklmmgoc)
-- 📄 **Privacy Policy**: [/privacy-policy](https://focusmask.app/privacy-policy)
+- 📄 **Privacy Policy**: [/privacy-policy](https://focus-mask.vercel.app/privacy-policy)
 
 ## License
 
