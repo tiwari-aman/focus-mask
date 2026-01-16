@@ -43,6 +43,7 @@ module.exports = {
         { from: "src/manifest.json", to: "manifest.json" },
         { from: "src/popup/popup.html", to: "popup.html" },
         { from: "src/assets", to: "assets", noErrorOnMissing: true },
+        { from: "src/_locales", to: "_locales" },
       ],
     }),
   ],
