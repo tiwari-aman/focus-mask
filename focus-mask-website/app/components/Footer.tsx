@@ -8,7 +8,7 @@ export default function Footer() {
   const isPrivacyPage = pathname === "/privacy-policy";
 
   return (
-    <footer className="py-12 bg-background-end">
+    <footer className="py-6 bg-background-end">
       <div
         className={`
           container mx-auto px-6

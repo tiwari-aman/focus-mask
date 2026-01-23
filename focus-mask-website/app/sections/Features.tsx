@@ -56,7 +56,7 @@ export default function Features() {
     {
       title: "Zero Distractions",
       description:
-        "Block interactions outside your focus area. No accidental clicks or wandering mouse.",
+        "Block interactions outside the focus area. No accidental clicks or wandering mouse.",
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -99,12 +99,12 @@ export default function Features() {
     <section
       id="features"
       className="relative overflow-hidden
-        py-16 md:py-28
+        py-8 md:py-20
         bg-[#0B1021]"
     >
       <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-10 sm:mb-14 md:mb-20">
+        <div className="text-center mb-10 sm:mb-14 ">
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -148,7 +148,7 @@ export default function Features() {
             },
           }}
           className="
-            grid grid-cols-1 md:grid-cols-2
+            grid grid-cols-1 md:grid-cols-1 
             gap-4 sm:gap-6
           "
         >
@@ -165,11 +165,13 @@ export default function Features() {
                 border border-white/10
                 bg-white/[0.03]
                 backdrop-blur-xl
-                px-5 py-6 sm:px-6 sm:py-7
+                px-4 py-6 sm:px-6 sm:py-6
                 flex gap-4
                 transition-all duration-300
                 hover:bg-white/[0.05]
                 hover:border-blue-500/30
+                w-full
+                max-w-2xl mx-auto
               "
             >
               {/* Icon */}

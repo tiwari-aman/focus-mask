@@ -26,7 +26,7 @@ export default function GetExtension() {
       id="get-extension"
       ref={containerRef}
       className="relative overflow-hidden
-        py-16 md:py-32"
+        py-8 md:py-12"
     >
       {/* Top gradient blend */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#0B1021] to-transparent pointer-events-none" />
@@ -50,9 +50,7 @@ export default function GetExtension() {
               border border-white/10
               bg-gradient-to-b from-white/[0.04] to-transparent
               shadow-2xl
-              px-6 py-10
-              sm:px-10 sm:py-14
-              md:px-16 md:py-16
+              px-4 py-10 md:px-10 md:py-14
               text-center
             "
           >
@@ -62,7 +60,7 @@ export default function GetExtension() {
             <h2
               className="
                 relative z-10
-                text-2xl sm:text-3xl md:text-5xl
+                text-xl sm:text-3xl md:text-5xl
                 font-semibold tracking-tight
                 text-white
                 mb-4 sm:mb-6
@@ -74,7 +72,7 @@ export default function GetExtension() {
             <p
               className="
                 relative z-10
-                text-sm sm:text-base md:text-xl
+                text-sm md:text-lg
                 text-text-muted
                 leading-relaxed
                 max-w-md sm:max-w-xl mx-auto

@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import TrueFocus from "@/app/components/TrueFocus";
 
 export default function Hero() {
   return (
-    <section className="relative pt-24 md:pt-28 pb-16 md:pb-24 overflow-hidden">
+    <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center text-center gap-10">
           {/* Text Content */}
@@ -14,17 +15,23 @@ export default function Hero() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-3xl md:text-5xl font-semibold leading-tight tracking-tight mb-6"
+              className="text-3xl flex justify-center text-center md:text-5xl font-semibold leading-tight tracking-tight mb-6 md:mb-8"
             >
-              <span className="text-blue-400">Focus</span>{" "}
-              <span className="text-white">on what matters.</span>
+              <TrueFocus
+                sentence="Focus on what matters."
+                manualMode
+                blurAmount={1}
+                borderColor="#82befa"
+                animationDuration={0.5}
+                pauseBetweenAnimations={1}
+              />
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-base md:text-lg text-text-muted max-w-xl mx-auto mb-8"
+              className="text-sm md:text-lg text-text-muted max-w-xl mx-auto mb-6"
             >
               Eliminate digital noise. Blur unrelated content, darken
               distractions, and lock in deep focus instantly.
