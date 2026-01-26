@@ -52,7 +52,7 @@ npm run start
 ## Project Structure
 
 ```
-focus-mask-website/
+website/
 ├── app/
 │   ├── components/     # Reusable UI components
 │   │   ├── Header.tsx
