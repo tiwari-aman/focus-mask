@@ -88,7 +88,7 @@
 /* Draggable center area */
 .focusmask-drag-area {
   pointer-events: auto !important;
-  cursor: grab;
+  /* cursor: grab; */
 }
 
 .focusmask-drag-area:active {
@@ -114,12 +114,16 @@
 /* Outlines around focus areas */
 .focusmask-outline-glow {
   pointer-events: none !important;
-  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease;
 }
 
 .focusmask-outline {
   pointer-events: none !important;
-  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease;
 }
 
 .focusmask-area-group.hovered .focusmask-outline-glow,
@@ -140,7 +144,9 @@
 .focusmask-resize-handle {
   pointer-events: none !important;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.15s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
 }
 
 .focusmask-resize-handle.visible,
@@ -148,7 +154,9 @@
 .focusmask-area-group.resizing .focusmask-resize-handle,
 .focusmask-area-group.dragging .focusmask-resize-handle {
   opacity: 1;
-  transition: opacity 0.2s ease, transform 0.15s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
 }
 
 /* Delete button hover effect */
@@ -183,7 +191,11 @@
 
 .focusmask-drawing-area.active {
   pointer-events: auto !important;
-  cursor: crosshair;
+  /* Custom crosshair cursor - visible on both dark and light backgrounds */
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 2v8M12 14v8M2 12h8M14 12h8' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M12 2v8M12 14v8M2 12h8M14 12h8' stroke='%234a7ab5' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%234a7ab5' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E")
+      12 12,
+    crosshair;
   background: rgba(74, 158, 255, 0.03);
 }
 
@@ -205,12 +217,14 @@
   padding: 12px;
   min-width: 200px;
   max-width: 220px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(130, 184, 249, 0.15) inset,
     0 1px 0 rgba(255, 255, 255, 0.03) inset;
   z-index: 99999999;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   color: #ffffff;
   user-select: none;
   display: none;
@@ -251,7 +265,7 @@
   padding: 4px 0 10px;
   border-bottom: 1px solid rgba(130, 184, 249, 0.25);
   margin-bottom: 10px;
-  cursor: grab;
+  /* cursor: grab; */
   user-select: none;
   margin-top: -2px;
   transition: background 0.15s ease;
@@ -723,7 +737,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(130, 184, 249, 0.15);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(130, 184, 249, 0.15);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 99999999;
   pointer-events: auto !important; /* Ensure interaction */
@@ -731,7 +747,9 @@
 
 .focusmask-floating-collapsed:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(130, 184, 249, 0.3), 0 0 0 1px rgba(130, 184, 249, 0.3);
+  box-shadow:
+    0 6px 16px rgba(130, 184, 249, 0.3),
+    0 0 0 1px rgba(130, 184, 249, 0.3);
   border-color: rgba(130, 184, 249, 0.7);
 }
 
@@ -775,6 +793,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  padding-block: 3px;
 }
 
 .focusmask-floating-btn {
@@ -804,8 +823,8 @@
 }
 
 .focusmask-floating-btn.disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .focusmask-floating-icon {
@@ -828,18 +847,48 @@
 }
 
 .focusmask-floating-control-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  gap: 6px;
 }
 
 .focusmask-floating-label {
-    font-size: 8px;
-    color: #6b8ab5;
-    text-transform: uppercase;
-    margin-bottom: 2px;
+  font-size: 8px;
+  color: #6b8ab5;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* Drag Handle */
+.focusmask-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 36px;
+  cursor: grab;
+  color: rgba(130, 184, 249, 0.5);
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+.focusmask-drag-handle:hover {
+  color: rgba(130, 184, 249, 0.9);
+}
+
+.focusmask-drag-handle:active {
+  cursor: grabbing;
+  color: #82b8f9;
+}
+
+.focusmask-drag-handle-icon {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
 }
 
 .focusmask-floating-slider {
@@ -864,14 +913,14 @@
 }
 
 .focusmask-floating-slider::-webkit-slider-runnable-track {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.1);
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .focusmask-close-btn:hover {
-    background: rgba(255, 50, 50, 0.2);
-    color: #ff5555;
+  background: rgba(255, 50, 50, 0.2);
+  color: #ff5555;
 }
 
 /* ============================================
@@ -899,7 +948,10 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.2s ease;
   border: 1px solid rgba(130, 184, 249, 0.35);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   z-index: 100000000;
@@ -948,46 +1000,46 @@
   bottom: calc(100% + 10px);
 }
 
-
 /* ============================================
    UPDATED EXPANDED TOOLBAR STYLES
    ============================================ */
 
 .focusmask-floating-logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    cursor: grab;
-    transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: transform 0.2s ease;
 }
 
 .focusmask-floating-logo-container:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 .focusmask-expanded-logo {
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    pointer-events: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  pointer-events: none;
 }
 
 .focusmask-floating-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #82b8f9;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    letter-spacing: 0.8px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    display: block;
-    opacity: 1;
+  font-size: 10px;
+  font-weight: 600;
+  color: #82b8f9;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.8px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  display: block;
+  opacity: 1;
 }
 
 /* Ensure sliders have enough space */
 .focusmask-floating-control-group {
-    width: 80px; /* Slightly wider */
+  width: 80px; /* Slightly wider */
 }
 
 /* ============================================
@@ -996,24 +1048,23 @@
 
 /* Squircle Shape */
 .focusmask-floating-expanded {
-    border-radius: 14px !important;
-    cursor: grab;
+  border-radius: 14px !important;
 }
 
 .focusmask-floating-expanded:active {
-    cursor: grabbing;
+  /* cursor: grabbing; */
 }
 
 /* Icons: More White & Brighter */
 .focusmask-floating-btn {
-    color: #e2e8f0; /* Much whiter (Slate-200) */
+  color: #e2e8f0; /* Much whiter (Slate-200) */
 }
 
 /* Drag Indicator: Match Icons */
 .focusmask-drag-indicator {
-    color: #e2e8f0; /* Match icons */
-    opacity: 0.8;
-    margin-left: 4px;
+  color: #e2e8f0; /* Match icons */
+  opacity: 0.8;
+  margin-left: 4px;
 }
 
 /* Labels: Consistent Typography */
@@ -1021,18 +1072,18 @@
 
 /* Slider Track Lighter */
 .focusmask-floating-slider {
-    background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Tooltips refinement */
 [data-tooltip]:after {
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #f1f5f9;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 6px 10px;
-    bottom: 130%;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 10px;
+  bottom: 130%;
 }
 
 /* ============================================
@@ -1060,8 +1111,9 @@
 }
 
 /* Ensure Logo uses higher quality image if available, handled via JS src but ensuring containment */
-.focusmask-expanded-logo, .focusmask-collapsed-icon {
-    image-rendering: -webkit-optimize-contrast; /* Sharpen if simple upscale */
+.focusmask-expanded-logo,
+.focusmask-collapsed-icon {
+  image-rendering: -webkit-optimize-contrast; /* Sharpen if simple upscale */
 }
 
 /* ============================================
@@ -1092,29 +1144,34 @@
 
 /* Reduced Size for Collapsed Button */
 .focusmask-floating-collapsed {
-    width: 44px !important;
-    height: 44px !important;
-    animation: fadeInIcon 0.4s ease-out forwards !important; /* Smooth entry after close */
-    opacity: 0; /* Start invisible for animation */
+  width: 44px !important;
+  height: 44px !important;
+  animation: fadeInIcon 0.4s ease-out forwards !important; /* Smooth entry after close */
+  opacity: 0; /* Start invisible for animation */
 }
 
 @keyframes fadeInIcon {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Reduced Icon Size inside Collapsed Button */
 .focusmask-collapsed-icon {
-    width: 35px !important;
-    height: 35px !important;
-    border-radius: 4px; /* Slight round on the image itself */
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 4px; /* Slight round on the image itself */
 }
 
 /* Ensure expanded toolbar keeps squircle */
 .focusmask-floating-expanded {
-    border-radius: 12px !important;
+  border-radius: 12px !important;
 }
-
 
 /* ============================================
    FIX ICON LOADING
@@ -1122,18 +1179,18 @@
 
 /* Ensure the image container fits perfectly */
 .focusmask-collapsed-icon {
-    width: 30px !important;
-    height: 30px !important;
-    object-fit: contain; /* Ensures aspect ratio is kept */
-    display: block; /* Removes inline spacing issues */ 
+  width: 30px !important;
+  height: 30px !important;
+  object-fit: contain; /* Ensures aspect ratio is kept */
+  display: block; /* Removes inline spacing issues */
 }
 
 /* Force override to ensure visibility */
 .focusmask-floating-collapsed {
-    overflow: hidden; /* Clip any potential overflow */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  overflow: hidden; /* Clip any potential overflow */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* ============================================
@@ -1166,13 +1223,19 @@
 
 /* Faster Icon Re-appearance */
 .focusmask-floating-collapsed {
-    animation: fadeInIcon 0.15s ease-out forwards !important; /* Fast, snappy entry */
+  animation: fadeInIcon 0.15s ease-out forwards !important; /* Fast, snappy entry */
 }
 
 /* Ensure no gap in visibility */
 @keyframes fadeInIcon {
-    0% { opacity: 0; transform: scale(0.9); }
-    100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ============================================
@@ -1182,21 +1245,22 @@
 /* 1. Hide the Expanded Logo immediately when closing starts */
 /* This prevents the "double logo" effect where you see the expanded one moving/fading AND the new one appealing */
 .focusmask-toolbar-container.closing .focusmask-expanded-logo {
-    opacity: 0 !important;
-    transition: opacity 0.05s ease !important;
+  opacity: 0 !important;
+  transition: opacity 0.05s ease !important;
 }
 
 /* 2. Make Collapsed Icon appear INSTANTLY */
 /* Remove the fade-in animation so it feels "fixed" in place immediately after the toolbar vanishes */
 .focusmask-floating-collapsed {
-    animation: none !important;
-    opacity: 1 !important;
-    /* transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);  Keep hover transition only */
+  animation: none !important;
+  opacity: 1 !important;
+  /* transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);  Keep hover transition only */
 }
 
 /* Ensure the logo image itself is always visible and contained */
-.focusmask-collapsed-icon, .focusmask-expanded-logo {
-    object-fit: contain;
+.focusmask-collapsed-icon,
+.focusmask-expanded-logo {
+  object-fit: contain;
 }
 
 /* ============================================
@@ -1205,27 +1269,29 @@
 
 /* Reset any previous complex animations */
 .focusmask-toolbar-container.closing .focusmask-floating-expanded {
-    animation: cleanExit 0.2s ease-in forwards !important;
-    transform-origin: right center !important; /* Shrinks towards the close button */
-    overflow: hidden;
+  animation: cleanExit 0.2s ease-in forwards !important;
+  transform-origin: right center !important; /* Shrinks towards the close button */
+  overflow: hidden;
 }
 
 /* Internal elements should just disappear with the container, no separate fade */
-.focusmask-toolbar-container.closing .focusmask-floating-controls, 
+.focusmask-toolbar-container.closing .focusmask-floating-controls,
 .focusmask-toolbar-container.closing .focusmask-floating-btn {
-    opacity: 1 !important; /* Keep solid until the container fades */
-    transition: none !important;
+  opacity: 1 !important; /* Keep solid until the container fades */
+  transition: none !important;
 }
 
 /* The Exit Animation: Simple Shrink & Fade */
 @keyframes cleanExit {
-  0% { 
+  0% {
     opacity: 1;
     transform: scale(1);
   }
-  100% { 
+  100% {
     opacity: 0;
-    transform: scale(0.5); /* Shrink significantly to suggest shrinking into the button */
+    transform: scale(
+      0.5
+    ); /* Shrink significantly to suggest shrinking into the button */
   }
 }
 
@@ -1234,23 +1300,26 @@
    ============================================ */
 
 .focusmask-floating-collapsed {
-    /* Force GPU layer to ensure border-radius clipping works perfectly on all browsers */
-    transform: translateZ(0); 
-    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Webkit clipping fix */
-    overflow: hidden !important;
-    background-clip: padding-box; /* clean borders */
+  /* Force GPU layer to ensure border-radius clipping works perfectly on all browsers */
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(
+    white,
+    black
+  ); /* Webkit clipping fix */
+  overflow: hidden !important;
+  background-clip: padding-box; /* clean borders */
 }
 
 .focusmask-floating-expanded {
-    /* Same for expanded toolbar */
-    transform: translateZ(0);
-    overflow: visible !important; /* Changed to visible to allow tooltips */
-    background-clip: padding-box;
-    /* Removed webkit mask to allow tooltip overflow */
+  /* Same for expanded toolbar */
+  transform: translateZ(0);
+  overflow: visible !important; /* Changed to visible to allow tooltips */
+  background-clip: padding-box;
+  /* Removed webkit mask to allow tooltip overflow */
 }
 
 /* Ensure Logo doesn't emit white corners if it has a background */
 .focusmask-collapsed-icon {
-    /* If the logo image itself has white corners, round them further */
-    border-radius: 8px !important; 
+  /* If the logo image itself has white corners, round them further */
+  border-radius: 8px !important;
 }

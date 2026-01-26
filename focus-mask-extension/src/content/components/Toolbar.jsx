@@ -38,8 +38,8 @@ function Toolbar({
   // Dragging Logic
   const handleMouseDown = useCallback(
     (e) => {
-        // Prevent default text selection
-      e.preventDefault(); 
+      // Prevent default text selection
+      e.preventDefault();
       if (!toolbarRef.current) return;
       // Only start drag if left click
       if (e.button !== 0) return;
@@ -51,27 +51,27 @@ function Toolbar({
         y: e.clientY - position.y,
       };
     },
-    [position]
+    [position],
   );
-  
+
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e) => {
-        hasMoved.current = true;
+      hasMoved.current = true;
       const newX = Math.max(
         0,
         Math.min(
           window.innerWidth - (toolbarRef.current?.offsetWidth || 50),
-          e.clientX - dragOffset.current.x
-        )
+          e.clientX - dragOffset.current.x,
+        ),
       );
       const newY = Math.max(
         0,
         Math.min(
           window.innerHeight - (toolbarRef.current?.offsetHeight || 50),
-          e.clientY - dragOffset.current.y
-        )
+          e.clientY - dragOffset.current.y,
+        ),
       );
       setPosition({ x: newX, y: newY });
     };
@@ -88,56 +88,56 @@ function Toolbar({
     };
   }, [isDragging]);
 
-  /* 
+  /*
    * Handle collapsing with proper position adjustment (shrinking towards right)
    */
   const handleCollapse = useCallback(() => {
-      // Capture width before animation starts
-      const width = toolbarRef.current?.offsetWidth || 0;
-      setIsClosing(true);
-      
-      setTimeout(() => {
-          setCollapsed(true);
-          setIsClosing(false);
-          // Shift position to the right so the icon appears where the right edge was
-          // 44px is the width of the collapsed icon
-          setPosition(prev => ({ ...prev, x: prev.x + width - 44 }));
-      }, 300); 
+    // Capture width before animation starts
+    const width = toolbarRef.current?.offsetWidth || 0;
+    setIsClosing(true);
+
+    setTimeout(() => {
+      setCollapsed(true);
+      setIsClosing(false);
+      // Shift position to the right so the icon appears where the right edge was
+      // 44px is the width of the collapsed icon
+      setPosition((prev) => ({ ...prev, x: prev.x + width - 44 }));
+    }, 300);
   }, []);
 
   // Collapse when clicking outside
   useEffect(() => {
-    if(collapsed) return;
-    
+    if (collapsed) return;
+
     // Don't auto-collapse if drawing mode is active
-    if(drawMode) return;
+    if (drawMode) return;
 
     const handleClickOutside = (event) => {
-        if (toolbarRef.current && !toolbarRef.current.contains(event.target)) {
-            // Use the animated collapse instead of instant setCollapsed(true)
-            handleCollapse();
-        }
+      if (toolbarRef.current && !toolbarRef.current.contains(event.target)) {
+        // Use the animated collapse instead of instant setCollapsed(true)
+        handleCollapse();
+      }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [collapsed, drawMode, handleCollapse]);
 
   const handleExpand = () => {
-      if(hasMoved.current) return;
+    if (hasMoved.current) return;
 
-      setCollapsed(false);
-      // Reposition if close to right edge to prevent overflow
-      const expandedWidth = 460; // Safe buffer
-      const windowWidth = window.innerWidth;
-      
-      if (position.x !== null) {
-        // Check if it would overflow right
-        if (position.x + expandedWidth > windowWidth) {
-           const newX = Math.max(10, windowWidth - expandedWidth - 20);
-           setPosition(prev => ({ ...prev, x: newX }));
-        }
+    setCollapsed(false);
+    // Reposition if close to right edge to prevent overflow
+    const expandedWidth = 460; // Safe buffer
+    const windowWidth = window.innerWidth;
+
+    if (position.x !== null) {
+      // Check if it would overflow right
+      if (position.x + expandedWidth > windowWidth) {
+        const newX = Math.max(10, windowWidth - expandedWidth - 20);
+        setPosition((prev) => ({ ...prev, x: newX }));
       }
+    }
   };
 
   if (!visible) return null;
@@ -147,36 +147,36 @@ function Toolbar({
       ref={toolbarRef}
       className={`focusmask-toolbar-container ${isDragging ? "dragging" : ""} ${isClosing ? "closing" : ""}`}
       style={{
-        position: 'fixed',
+        position: "fixed",
         left: position.x ?? "auto",
         top: position.y,
         zIndex: 99999999,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: collapsed ? (isDragging ? "grabbing" : "grab") : "default",
         userSelect: "none",
         pointerEvents: "auto",
       }}
     >
-        {collapsed ? (
-            <FloatingToolbarCollapsed 
-                onClick={handleExpand}
-                onMouseDown={handleMouseDown} 
-            />
-        ) : (
-            <FloatingToolbarExpanded
-                drawMode={drawMode}
-                blur={blur}
-                darkness={darkness}
-                blockInteraction={blockInteraction}
-                hasReachedLimit={hasReachedLimit}
-                onToggleDrawMode={onToggleDrawMode}
-                onClear={onClear}
-                onBlurChange={onBlurChange}
-                onDarknessChange={onDarknessChange}
-                onBlockChange={onBlockChange}
-                onCollapse={handleCollapse}
-                onMouseDown={handleMouseDown}
-            />
-        )}
+      {collapsed ? (
+        <FloatingToolbarCollapsed
+          onClick={handleExpand}
+          onMouseDown={handleMouseDown}
+        />
+      ) : (
+        <FloatingToolbarExpanded
+          drawMode={drawMode}
+          blur={blur}
+          darkness={darkness}
+          blockInteraction={blockInteraction}
+          hasReachedLimit={hasReachedLimit}
+          onToggleDrawMode={onToggleDrawMode}
+          onClear={onClear}
+          onBlurChange={onBlurChange}
+          onDarknessChange={onDarknessChange}
+          onBlockChange={onBlockChange}
+          onCollapse={handleCollapse}
+          onMouseDown={handleMouseDown}
+        />
+      )}
     </div>
   );
 }

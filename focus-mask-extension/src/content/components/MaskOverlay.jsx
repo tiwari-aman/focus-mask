@@ -1,10 +1,27 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 
-function MaskOverlay({ areas, previewArea, blur, darkness, onRemoveArea, onResizeArea }) {
+function MaskOverlay({
+  areas,
+  previewArea,
+  blur,
+  darkness,
+  onRemoveArea,
+  onResizeArea,
+  blockInteraction,
+}) {
   return (
     <>
       <div className="focusmask-mask-overlay">
-        <BlurOverlay areas={areas} previewArea={previewArea} blur={blur} darkness={darkness} />
+        <BlurOverlay
+          areas={areas}
+          previewArea={previewArea}
+          blur={blur}
+          darkness={darkness}
+        />
+        {/* Separate cursor overlay for block interaction */}
+        {blockInteraction && areas.length > 0 && (
+          <CursorOverlay areas={areas} />
+        )}
       </div>
       <svg className="focusmask-svg">
         {areas.map((area, index) => (
@@ -21,6 +38,68 @@ function MaskOverlay({ areas, previewArea, blur, darkness, onRemoveArea, onResiz
   );
 }
 
+/**
+ * Cursor overlay that shows not-allowed cursor only outside focus areas
+ * Uses 4 rectangles around the focus area to show blocked cursor
+ */
+function CursorOverlay({ areas }) {
+  // For the cursor overlay, we'll use 4 rectangles around the focus area
+  // Add padding to avoid covering resize handles and delete button
+  const overlayRects = useMemo(() => {
+    if (areas.length === 0) return [];
+
+    const area = areas[0]; // Support single area for now
+    // Add padding to avoid covering resize handles (corners) and delete button (top-right)
+    const padding = 35; // Extra space for controls
+
+    return [
+      // Top rectangle - leave space for delete button
+      { top: 0, left: 0, width: "100%", height: Math.max(0, area.y - padding) },
+      // Bottom rectangle
+      {
+        top: area.y + area.height + padding,
+        left: 0,
+        width: "100%",
+        height: `calc(100% - ${area.y + area.height + padding}px)`,
+      },
+      // Left rectangle
+      {
+        top: Math.max(0, area.y - padding),
+        left: 0,
+        width: Math.max(0, area.x - padding),
+        height: area.height + padding * 2,
+      },
+      // Right rectangle - leave space for delete button
+      {
+        top: Math.max(0, area.y - padding),
+        left: area.x + area.width + padding,
+        width: `calc(100% - ${area.x + area.width + padding}px)`,
+        height: area.height + padding * 2,
+      },
+    ];
+  }, [areas]);
+
+  return (
+    <>
+      {overlayRects.map((rect, i) => (
+        <div
+          key={i}
+          style={{
+            position: "fixed",
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            cursor: "not-allowed",
+            pointerEvents: "auto",
+            zIndex: 999990, // Lower than toolbar (999999) and SVG controls
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 function BlurOverlay({ areas, previewArea, blur, darkness }) {
   // Combine areas and previewArea (if exists) for the cutouts
   const allAreas = useMemo(() => {
@@ -28,7 +107,10 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
   }, [areas, previewArea]);
 
   // Generate a unique ID for this mask
-  const maskId = useMemo(() => `focusmask-blur-mask-${Math.random().toString(36).substr(2, 9)}`, []);
+  const maskId = useMemo(
+    () => `focusmask-blur-mask-${Math.random().toString(36).substr(2, 9)}`,
+    [],
+  );
 
   // Border radius for the cutout corners (matches the outline rx="6")
   const cornerRadius = 6;
@@ -36,15 +118,15 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
   return (
     <>
       {/* SVG with mask definition */}
-      <svg 
-        style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          width: '100%', 
-          height: '100%', 
-          pointerEvents: 'none',
-          zIndex: 0
+      <svg
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 0,
         }}
       >
         <defs>
@@ -67,7 +149,7 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
           </mask>
         </defs>
       </svg>
-      
+
       {/* Blur overlay with SVG mask applied */}
       <div
         className="focusmask-blur-section"
@@ -75,8 +157,8 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
           backgroundColor: `rgba(0, 0, 0, ${darkness})`,
           backdropFilter: `blur(${blur}px)`,
           WebkitBackdropFilter: `blur(${blur}px)`,
-          mask: allAreas.length > 0 ? `url(#${maskId})` : 'none',
-          WebkitMask: allAreas.length > 0 ? `url(#${maskId})` : 'none',
+          mask: allAreas.length > 0 ? `url(#${maskId})` : "none",
+          WebkitMask: allAreas.length > 0 ? `url(#${maskId})` : "none",
         }}
       />
     </>
@@ -152,7 +234,7 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       setStartPos({ x: e.clientX, y: e.clientY });
       setStartArea({ ...area });
     },
-    [area]
+    [area],
   );
 
   // Handle drag start
@@ -164,7 +246,7 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       setStartPos({ x: e.clientX, y: e.clientY });
       setStartArea({ ...area });
     },
-    [area]
+    [area],
   );
 
   // Handle resize move

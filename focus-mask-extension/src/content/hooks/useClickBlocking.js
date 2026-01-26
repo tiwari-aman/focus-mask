@@ -20,8 +20,74 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
         );
       });
     },
-    [areas]
+    [areas],
   );
+
+  // Effect to inject/remove cursor style when blocking is active
+  useEffect(() => {
+    if (!enabled || !blockInteraction || areas.length === 0) {
+      // Remove any existing cursor style
+      const existingStyle = document.getElementById(
+        "focusmask-block-cursor-style",
+      );
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      return;
+    }
+
+    // Create style element for toolbar cursor fixes only
+    // The blur overlay handles the not-allowed cursor for blocked areas
+    let styleEl = document.getElementById("focusmask-block-cursor-style");
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "focusmask-block-cursor-style";
+      document.head.appendChild(styleEl);
+    }
+
+    // Only fix toolbar and focus area cursors - the blur overlay handles the rest
+    styleEl.textContent = `
+      /* Toolbar cursors */
+      .focusmask-toolbar-container,
+      .focusmask-toolbar-container * {
+        cursor: auto !important;
+      }
+      .focusmask-floating-expanded,
+      .focusmask-floating-expanded * {
+        cursor: auto !important;
+      }
+      .focusmask-floating-collapsed {
+        cursor: pointer !important;
+      }
+      .focusmask-drag-handle {
+        cursor: grab !important;
+      }
+      .focusmask-floating-btn {
+        cursor: pointer !important;
+      }
+      .focusmask-floating-btn.disabled {
+        cursor: not-allowed !important;
+      }
+      .focusmask-floating-slider {
+        cursor: pointer !important;
+      }
+      /* Focus area controls */
+      .focusmask-svg,
+      .focusmask-svg * {
+        cursor: auto !important;
+      }
+      .focusmask-area-group,
+      .focusmask-area-group * {
+        cursor: auto !important;
+      }
+    `;
+
+    return () => {
+      if (styleEl && styleEl.parentNode) {
+        styleEl.remove();
+      }
+    };
+  }, [enabled, blockInteraction, areas.length]);
 
   useEffect(() => {
     if (!enabled || !blockInteraction) return;
@@ -33,7 +99,12 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
 
     const handleBlockedClick = (e) => {
       // Allow clicks on toolbar (new floating toolbar classes)
-      if (e.target.closest(".focusmask-toolbar-container") || e.target.closest(".focusmask-floating-expanded") || e.target.closest(".focusmask-floating-collapsed")) return;
+      if (
+        e.target.closest(".focusmask-toolbar-container") ||
+        e.target.closest(".focusmask-floating-expanded") ||
+        e.target.closest(".focusmask-floating-collapsed")
+      )
+        return;
 
       // Allow clicks on any FocusMask SVG elements (delete buttons, resize handles, etc.)
       if (e.target.closest(".focusmask-svg")) return;

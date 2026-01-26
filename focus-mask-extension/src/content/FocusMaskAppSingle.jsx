@@ -55,7 +55,7 @@ function FocusMaskAppSingle() {
         return newState;
       });
     },
-    [saveState]
+    [saveState],
   );
 
   // Listen for messages from popup/background
@@ -96,7 +96,7 @@ function FocusMaskAppSingle() {
     state.enabled,
     state.blockInteraction && state.areas.length > 0,
     state.drawMode,
-    state.areas
+    state.areas,
   );
 
   // Check if point is inside any area
@@ -111,7 +111,7 @@ function FocusMaskAppSingle() {
         );
       });
     },
-    [state.areas]
+    [state.areas],
   );
 
   // Drawing handlers
@@ -131,7 +131,7 @@ function FocusMaskAppSingle() {
       startPosRef.current = { x, y };
       setCurrentRect({ x, y, width: 0, height: 0 });
     },
-    [state.drawMode, isPointInAnyArea, hasReachedLimit]
+    [state.drawMode, isPointInAnyArea, hasReachedLimit],
   );
 
   const handleDraw = useCallback(
@@ -148,7 +148,7 @@ function FocusMaskAppSingle() {
 
       setCurrentRect({ x, y, width, height });
     },
-    [isDrawing]
+    [isDrawing],
   );
 
   const handleStopDrawing = useCallback(() => {
@@ -189,38 +189,38 @@ function FocusMaskAppSingle() {
       const newAreas = state.areas.filter((_, i) => i !== index);
       updateState({ areas: newAreas });
     },
-    [state.areas, updateState]
+    [state.areas, updateState],
   );
 
   const resizeArea = useCallback(
     (index, newArea) => {
       const newAreas = state.areas.map((area, i) =>
-        i === index ? newArea : area
+        i === index ? newArea : area,
       );
       updateState({ areas: newAreas });
     },
-    [state.areas, updateState]
+    [state.areas, updateState],
   );
 
   const handleBlurChange = useCallback(
     (value) => {
       updateState({ blur: value });
     },
-    [updateState]
+    [updateState],
   );
 
   const handleDarknessChange = useCallback(
     (value) => {
       updateState({ darkness: value });
     },
-    [updateState]
+    [updateState],
   );
 
   const handleBlockChange = useCallback(
     (value) => {
       updateState({ blockInteraction: value });
     },
-    [updateState]
+    [updateState],
   );
 
   if (!state.enabled) {
@@ -237,6 +237,7 @@ function FocusMaskAppSingle() {
           darkness={state.darkness}
           onRemoveArea={removeArea}
           onResizeArea={resizeArea}
+          blockInteraction={state.blockInteraction}
         />
         <DrawingArea
           active={state.drawMode && !hasReachedLimit}
