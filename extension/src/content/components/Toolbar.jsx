@@ -10,7 +10,9 @@ function Toolbar({
   darkness,
   blockInteraction,
   hasReachedLimit = false,
+  maskActive = true,
   onToggle,
+  onToggleMaskActive,
   onToggleDrawMode,
   onClear,
   onBlurChange,
@@ -92,6 +94,8 @@ function Toolbar({
    * Handle collapsing with proper position adjustment (shrinking towards right)
    */
   const handleCollapse = useCallback(() => {
+    if (collapsed || isClosing) return;
+
     // Capture width before animation starts
     const width = toolbarRef.current?.offsetWidth || 0;
     setIsClosing(true);
@@ -103,7 +107,7 @@ function Toolbar({
       // 44px is the width of the collapsed icon
       setPosition((prev) => ({ ...prev, x: prev.x + width - 44 }));
     }, 300);
-  }, []);
+  }, [collapsed, isClosing]);
 
   // Collapse when clicking outside
   useEffect(() => {
@@ -168,6 +172,8 @@ function Toolbar({
           darkness={darkness}
           blockInteraction={blockInteraction}
           hasReachedLimit={hasReachedLimit}
+          maskActive={maskActive}
+          onToggleMaskActive={onToggleMaskActive}
           onToggleDrawMode={onToggleDrawMode}
           onClear={onClear}
           onBlurChange={onBlurChange}

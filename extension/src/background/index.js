@@ -38,6 +38,7 @@ function getTabState(tabId) {
   if (!tabStates.has(tabId)) {
     tabStates.set(tabId, {
       enabled: false,
+      maskActive: true,
       areas: [],
       drawMode: false,
     });
@@ -98,7 +99,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
   // Save state: separate global settings from per-tab state
   if (message.action === "setState") {
-    const { enabled, areas, drawMode, ...globalState } = message.state || {};
+    const { enabled, maskActive, areas, drawMode, ...globalState } = message.state || {};
 
     // Save global settings to persistent storage
     if (Object.keys(globalState).length) {
@@ -108,6 +109,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
     // Update per-tab state in memory
     const tabUpdate = {};
     if (enabled !== undefined) tabUpdate.enabled = enabled;
+    if (maskActive !== undefined) tabUpdate.maskActive = maskActive;
     if (areas !== undefined) tabUpdate.areas = areas;
     if (drawMode !== undefined) tabUpdate.drawMode = drawMode;
 

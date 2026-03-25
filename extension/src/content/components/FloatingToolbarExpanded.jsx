@@ -9,8 +9,10 @@ function FloatingToolbarExpanded({
   darkness,
   blockInteraction,
   hasReachedLimit,
+  maskActive,
   onToggleDrawMode,
   onClear,
+  onToggleMaskActive,
   onBlurChange,
   onDarknessChange,
   onBlockChange,
@@ -59,16 +61,18 @@ function FloatingToolbarExpanded({
 
         {/* Draw Button */}
         <button
-          className={`focusmask-floating-btn ${drawMode ? "active" : ""} ${hasReachedLimit && !drawMode ? "disabled" : ""}`}
-          onClick={onToggleDrawMode}
+          className={`focusmask-floating-btn ${drawMode ? "active" : ""} ${(hasReachedLimit && !drawMode) || !maskActive ? "disabled" : ""}`}
+          onClick={maskActive ? onToggleDrawMode : undefined}
           onMouseDown={stopPropagation} // Prevent drag
-          disabled={hasReachedLimit && !drawMode}
+          disabled={(hasReachedLimit && !drawMode) || !maskActive}
           data-tooltip={
-            hasReachedLimit && !drawMode
-              ? "Area limit reached (1 max)"
-              : drawMode
-                ? "Cancel selection"
-                : "Select focus area"
+            !maskActive
+              ? "Enable mask to select"
+              : hasReachedLimit && !drawMode
+                ? "Area limit reached (1 max)"
+                : drawMode
+                  ? "Cancel selection"
+                  : "Select focus area"
           }
         >
           <svg
@@ -92,12 +96,16 @@ function FloatingToolbarExpanded({
 
         {/* Clear Button */}
         <button
-          className={`focusmask-floating-btn ${!hasReachedLimit ? "disabled" : ""}`}
-          onClick={hasReachedLimit ? onClear : undefined}
+          className={`focusmask-floating-btn ${!hasReachedLimit || !maskActive ? "disabled" : ""}`}
+          onClick={hasReachedLimit && maskActive ? onClear : undefined}
           onMouseDown={stopPropagation}
-          disabled={!hasReachedLimit}
+          disabled={!hasReachedLimit || !maskActive}
           data-tooltip={
-            hasReachedLimit ? "Clear focus area" : "No area to clear"
+            !maskActive
+              ? "Enable mask to clear"
+              : hasReachedLimit
+                ? "Clear focus area"
+                : "No area to clear"
           }
         >
           <svg
@@ -111,55 +119,22 @@ function FloatingToolbarExpanded({
           </svg>
         </button>
 
-        <div className="focusmask-divider"></div>
-
-        {/* Sliders Area with Labels */}
-        <div className="focusmask-floating-controls">
-          <div className="focusmask-floating-control-group">
-            <div className="focusmask-floating-label">BLUR</div>
-            <input
-              type="range"
-              className="focusmask-floating-slider"
-              min="0"
-              max="100"
-              value={blurPercent}
-              onChange={(e) =>
-                onBlurChange(Math.round((parseInt(e.target.value) / 100) * 20))
-              }
-              onMouseDown={stopPropagation}
-              data-tooltip={`Blur: ${blurPercent}%`}
-            />
-          </div>
-
-          <div className="focusmask-floating-control-group">
-            <div className="focusmask-floating-label">DARK</div>
-            <input
-              type="range"
-              className="focusmask-floating-slider"
-              min="0"
-              max="100"
-              value={darknessPercent}
-              onChange={(e) => onDarknessChange(parseInt(e.target.value) / 100)}
-              onMouseDown={stopPropagation}
-              data-tooltip={`Darkness: ${darknessPercent}%`}
-            />
-          </div>
-        </div>
-
-        <div className="focusmask-divider"></div>
-
         {/* Block Interaction Toggle */}
         <button
-          className={`focusmask-floating-btn ${blockInteraction ? "active" : ""} ${!hasReachedLimit ? "disabled" : ""}`}
-          onClick={() => hasReachedLimit && onBlockChange(!blockInteraction)}
+          className={`focusmask-floating-btn ${blockInteraction ? "active" : ""} ${!hasReachedLimit || !maskActive ? "disabled" : ""}`}
+          onClick={() =>
+            hasReachedLimit && maskActive && onBlockChange(!blockInteraction)
+          }
           onMouseDown={stopPropagation}
-          disabled={!hasReachedLimit}
+          disabled={!hasReachedLimit || !maskActive}
           data-tooltip={
-            !hasReachedLimit
-              ? "Select an area first"
-              : blockInteraction
-                ? "Allow clicking outside"
-                : "Block clicking outside"
+            !maskActive
+              ? "Enable mask first"
+              : !hasReachedLimit
+                ? "Select an area first"
+                : blockInteraction
+                  ? "Allow clicking outside"
+                  : "Block clicking outside"
           }
         >
           {/* Mouse Cursor with Block Icon */}
@@ -187,6 +162,69 @@ function FloatingToolbarExpanded({
               stroke="#8a9bb5"
               strokeWidth="1.8"
             />
+          </svg>
+        </button>
+
+        <div className="focusmask-divider"></div>
+
+        {/* Sliders Area with Labels */}
+        <div className="focusmask-floating-controls">
+          <div className="focusmask-floating-control-group">
+            <div className="focusmask-floating-label">BLUR</div>
+            <input
+              type="range"
+              className="focusmask-floating-slider"
+              min="0"
+              max="100"
+              value={blurPercent}
+              onChange={(e) =>
+                maskActive &&
+                onBlurChange(Math.round((parseInt(e.target.value) / 100) * 20))
+              }
+              onMouseDown={stopPropagation}
+              disabled={!maskActive}
+              style={{ opacity: maskActive ? 1 : 0.5 }}
+              data-tooltip={maskActive ? `Blur: ${blurPercent}%` : "Enable mask to adjust"}
+            />
+          </div>
+
+          <div className="focusmask-floating-control-group">
+            <div className="focusmask-floating-label">DARK</div>
+            <input
+              type="range"
+              className="focusmask-floating-slider"
+              min="0"
+              max="100"
+              value={darknessPercent}
+              onChange={(e) =>
+                maskActive &&
+                onDarknessChange(parseInt(e.target.value) / 100)
+              }
+              onMouseDown={stopPropagation}
+              disabled={!maskActive}
+              style={{ opacity: maskActive ? 1 : 0.5 }}
+              data-tooltip={maskActive ? `Darkness: ${darknessPercent}%` : "Enable mask to adjust"}
+            />
+          </div>
+        </div>
+
+        <div className="focusmask-divider"></div>
+
+        {/* Mask Active Toggle Button */}
+        <button
+          className={`focusmask-floating-btn ${maskActive ? "active" : "inactive"}`}
+          onClick={onToggleMaskActive}
+          onMouseDown={stopPropagation}
+          data-tooltip={maskActive ? "Turn focus mask OFF" : "Turn focus mask ON"}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="focusmask-floating-icon"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" />
           </svg>
         </button>
 

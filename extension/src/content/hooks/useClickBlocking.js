@@ -10,13 +10,13 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
   const isViewportPointInAnyArea = useCallback(
     (clientX, clientY) => {
       return areas.some((area) => {
-        // Areas are stored with their visual position (fixed positioning)
-        // So we compare directly against area bounds
+        // Use a small buffer to handle rounding/subpixel offsets
+        const buffer = 1; 
         return (
-          clientX >= area.x &&
-          clientX <= area.x + area.width &&
-          clientY >= area.y &&
-          clientY <= area.y + area.height
+          clientX >= area.x - buffer &&
+          clientX <= area.x + area.width + buffer &&
+          clientY >= area.y - buffer &&
+          clientY <= area.y + area.height + buffer
         );
       });
     },
@@ -45,40 +45,27 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
       document.head.appendChild(styleEl);
     }
 
-    // Only fix toolbar and focus area cursors - the blur overlay handles the rest
+    // Only fix toolbar and focus area handles - NOT the whole SVG
     styleEl.textContent = `
-      /* Toolbar cursors */
+      /* Ensure toolbar and focus area containers allow cursors */
       .focusmask-toolbar-container,
-      .focusmask-toolbar-container * {
-        cursor: auto !important;
-      }
       .focusmask-floating-expanded,
-      .focusmask-floating-expanded * {
-        cursor: auto !important;
-      }
       .focusmask-floating-collapsed {
-        cursor: pointer !important;
+        pointer-events: auto !important;
       }
-      .focusmask-drag-handle {
-        cursor: grab !important;
-      }
+      
+      /* Reset buttons to pointer if they were being overridden */
       .focusmask-floating-btn {
         cursor: pointer !important;
       }
       .focusmask-floating-btn.disabled {
         cursor: not-allowed !important;
       }
+      .focusmask-drag-handle {
+        cursor: grab !important;
+      }
       .focusmask-floating-slider {
         cursor: pointer !important;
-      }
-      /* Focus area controls */
-      .focusmask-svg,
-      .focusmask-svg * {
-        cursor: auto !important;
-      }
-      .focusmask-area-group,
-      .focusmask-area-group * {
-        cursor: auto !important;
       }
     `;
 
@@ -118,11 +105,15 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
       // Allow clicks during draw mode
       if (drawMode) return;
 
+      // If no areas are active, don't block interactions yet
+      if (areas.length === 0) return;
+
       // Get click coordinates in viewport
-      const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
-      const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
+      const clientX = e.clientX ?? (e.touches?.[0]?.clientX || e.changedTouches?.[0]?.clientX || 0);
+      const clientY = e.clientY ?? (e.touches?.[0]?.clientY || e.changedTouches?.[0]?.clientY || 0);
 
       // Check if click is inside any focus area (viewport coords)
+      // AREAS MUST BE VIEWPORT-RELATIVE FOR THIS TO WORK CORRECTLY
       if (!isViewportPointInAnyArea(clientX, clientY)) {
         e.preventDefault();
         e.stopPropagation();
@@ -134,6 +125,7 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
     const handleBlockedScroll = (e) => {
       if (e.target.closest(".focusmask-toolbar")) return;
       if (drawMode) return;
+      if (areas.length === 0) return;
 
       // Get cursor position in viewport
       let clientX, clientY;
@@ -144,6 +136,9 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
       } else if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
       } else {
         clientX = mousePositionRef.current.x;
         clientY = mousePositionRef.current.y;

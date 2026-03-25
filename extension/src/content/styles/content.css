@@ -446,6 +446,7 @@
   border-radius: 3px;
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
   border: 1px solid rgba(130, 184, 249, 0.2);
 }
 
@@ -822,6 +823,16 @@
   box-shadow: 0 0 10px rgba(74, 122, 181, 0.2);
 }
 
+.focusmask-floating-btn.inactive {
+  color: #ff5555;
+  background: rgba(255, 50, 50, 0.1);
+}
+
+.focusmask-floating-btn.inactive:hover {
+  background: rgba(255, 50, 50, 0.2);
+  color: #ff7777;
+}
+
 .focusmask-floating-btn.disabled {
   opacity: 0.3;
   cursor: not-allowed;
@@ -1051,9 +1062,6 @@
   border-radius: 14px !important;
 }
 
-.focusmask-floating-expanded:active {
-  /* cursor: grabbing; */
-}
 
 /* Icons: More White & Brighter */
 .focusmask-floating-btn {
@@ -1306,6 +1314,10 @@
     white,
     black
   ); /* Webkit clipping fix */
+  mask-image: radial-gradient(
+    white,
+    black
+  );
   overflow: hidden !important;
   background-clip: padding-box; /* clean borders */
 }

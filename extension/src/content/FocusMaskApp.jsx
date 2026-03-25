@@ -6,6 +6,7 @@ import useClickBlocking from "./hooks/useClickBlocking";
 
 const DEFAULT_STATE = {
   enabled: false,
+  maskActive: true,
   blur: 5,
   darkness: 0.5,
   blockInteraction: false,
@@ -79,7 +80,7 @@ function FocusMaskApp() {
 
   // Click blocking hook
   useClickBlocking(
-    state.enabled,
+    state.enabled && state.maskActive,
     state.blockInteraction,
     state.drawMode,
     state.areas
@@ -105,8 +106,8 @@ function FocusMaskApp() {
     (e) => {
       if (!state.drawMode) return;
 
-      const x = e.clientX + window.scrollX;
-      const y = e.clientY + window.scrollY;
+      const x = e.clientX;
+      const y = e.clientY;
 
       if (isPointInAnyArea(x, y)) return;
 
@@ -121,8 +122,8 @@ function FocusMaskApp() {
     (e) => {
       if (!isDrawing) return;
 
-      const currentX = e.clientX + window.scrollX;
-      const currentY = e.clientY + window.scrollY;
+      const currentX = e.clientX;
+      const currentY = e.clientY;
 
       const x = Math.min(startPosRef.current.x, currentX);
       const y = Math.min(startPosRef.current.y, currentY);
@@ -150,6 +151,10 @@ function FocusMaskApp() {
   const toggleEnabled = useCallback(() => {
     updateState({ enabled: !state.enabled });
   }, [state.enabled, updateState]);
+
+  const toggleMaskActive = useCallback(() => {
+    updateState({ maskActive: !state.maskActive });
+  }, [state.maskActive, updateState]);
 
   const toggleDrawMode = useCallback(() => {
     updateState({ drawMode: !state.drawMode });
@@ -204,30 +209,35 @@ function FocusMaskApp() {
 
   return (
     <>
-      <div className={`focusmask-container ${state.enabled ? "visible" : ""}`}>
-        <MaskOverlay
-          areas={state.areas}
-          blur={state.blur}
-          darkness={state.darkness}
-          onRemoveArea={removeArea}
-          onResizeArea={resizeArea}
-        />
-        <DrawingArea
-          active={state.drawMode}
-          currentRect={currentRect}
-          onStartDrawing={handleStartDrawing}
-          onDraw={handleDraw}
-          onStopDrawing={handleStopDrawing}
-        />
-      </div>
+      {state.maskActive && (
+        <div className={`focusmask-container ${state.enabled ? "visible" : ""}`}>
+          <MaskOverlay
+            areas={state.areas}
+            blur={state.blur}
+            darkness={state.darkness}
+            onRemoveArea={removeArea}
+            onResizeArea={resizeArea}
+          />
+          <DrawingArea
+            active={state.drawMode}
+            currentRect={currentRect}
+            onStartDrawing={handleStartDrawing}
+            onDraw={handleDraw}
+            onStopDrawing={handleStopDrawing}
+          />
+        </div>
+      )}
       <Toolbar
         visible={state.enabled}
         enabled={state.enabled}
+        hasReachedLimit={state.areas.length >= 1}
+        maskActive={state.maskActive}
         drawMode={state.drawMode}
         blur={state.blur}
         darkness={state.darkness}
         blockInteraction={state.blockInteraction}
         onToggle={toggleEnabled}
+        onToggleMaskActive={toggleMaskActive}
         onToggleDrawMode={toggleDrawMode}
         onClear={clearAreas}
         onBlurChange={handleBlurChange}
