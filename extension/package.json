@@ -1,6 +1,6 @@
 {
   "name": "focusmask-extension",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Focus on specific areas of any webpage by blurring and darkening everything else",
   "scripts": {
     "build": "webpack --mode production",
