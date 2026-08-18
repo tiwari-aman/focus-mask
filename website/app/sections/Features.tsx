@@ -93,6 +93,43 @@ export default function Features() {
         </svg>
       ),
     },
+    {
+      title: "Shadow DOM Protected",
+      description:
+        "Styles stay pixel-perfect. Host website stylesheets, resets, and themes can never distort your focus overlay.",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          className="w-6 h-6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Works Everywhere & Offline",
+      description:
+        "Seamless support for local HTML files (file://), offline documents, and touchscreens with instant Esc key dismiss.",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          className="w-6 h-6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+          <polyline points="13 2 13 9 20 9" />
+        </svg>
+      ),
+    },
   ];
 
   return (
