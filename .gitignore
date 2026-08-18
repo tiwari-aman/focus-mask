@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+*.log
