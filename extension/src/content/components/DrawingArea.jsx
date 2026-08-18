@@ -11,10 +11,12 @@ function DrawingArea({
     <>
       <div
         className={`focusmask-drawing-area ${active ? "active" : ""}`}
-        onMouseDown={onStartDrawing}
-        onMouseMove={onDraw}
-        onMouseUp={onStopDrawing}
-        onMouseLeave={onStopDrawing}
+        style={{ touchAction: "none" }}
+        onPointerDown={onStartDrawing}
+        onPointerMove={onDraw}
+        onPointerUp={onStopDrawing}
+        onPointerCancel={onStopDrawing}
+        onPointerLeave={onStopDrawing}
       />
       {currentRect && (
         <svg className="focusmask-preview-svg">

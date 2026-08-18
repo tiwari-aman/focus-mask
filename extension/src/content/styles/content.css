@@ -1,13 +1,24 @@
 /* Focus Mask Content Script Styles */
 
-/* Root container */
+/* Root container & Shadow DOM Host */
+:host,
 #focusmask-root {
   position: fixed;
   top: 0;
   left: 0;
   width: 0;
   height: 0;
-  z-index: 999998;
+  z-index: 2147483647 !important;
+  pointer-events: none;
+}
+
+.focusmask-shadow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483647 !important;
   pointer-events: none;
 }
 
@@ -19,7 +30,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none !important;
-  z-index: 999998;
+  z-index: 10;
   display: none;
 }
 
@@ -727,13 +738,19 @@
    NEW FLOATING TOOLBAR
    ============================================ */
 
+.focusmask-toolbar-container {
+  position: fixed;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
+}
+
 .focusmask-floating-collapsed {
   /* position: absolute; Handled by container */
-  width: 60px; /* INCREASED SIZE */
-  height: 60px; /* INCREASED SIZE */
+  width: 42px;
+  height: 42px;
   background: linear-gradient(135deg, #172030, #0d121e);
-  border: 2px solid rgba(130, 184, 249, 0.5);
-  border-radius: 50%;
+  border: 1.5px solid rgba(130, 184, 249, 0.5);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -743,11 +760,11 @@
     0 0 0 1px rgba(130, 184, 249, 0.15);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 99999999;
-  pointer-events: auto !important; /* Ensure interaction */
+  pointer-events: auto !important;
 }
 
 .focusmask-floating-collapsed:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
   box-shadow:
     0 6px 16px rgba(130, 184, 249, 0.3),
     0 0 0 1px rgba(130, 184, 249, 0.3);
@@ -755,10 +772,10 @@
 }
 
 .focusmask-collapsed-icon {
-  width: 32px; /* INCREASED SIZE */
-  height: 32px; /* INCREASED SIZE */
+  width: 22px;
+  height: 22px;
   pointer-events: none;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .focusmask-floating-expanded {
@@ -767,14 +784,14 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(130, 184, 249, 0.35);
-  border-radius: 50px; /* Pill shape */
-  padding: 6px;
+  border-radius: 40px; /* Pill shape */
+  padding: 4px 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   animation: expandToolbar 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
-  pointer-events: auto !important; /* Ensure interaction */
+  pointer-events: auto !important;
 }
 
 @keyframes expandToolbar {
@@ -793,13 +810,13 @@
 .focusmask-floating-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding-block: 3px;
+  gap: 3px;
+  padding-block: 2px;
 }
 
 .focusmask-floating-btn {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -839,22 +856,22 @@
 }
 
 .focusmask-floating-icon {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
 }
 
 .focusmask-divider {
   width: 1px;
-  height: 24px;
+  height: 20px;
   background: rgba(255, 255, 255, 0.15);
-  margin: 0 6px;
+  margin: 0 5px;
 }
 
 .focusmask-floating-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 4px;
+  gap: 8px;
+  padding: 0 3px;
 }
 
 .focusmask-floating-control-group {
@@ -862,15 +879,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  gap: 6px;
+  width: 60px;
+  gap: 4px;
 }
 
 .focusmask-floating-label {
-  font-size: 8px;
+  font-size: 7.5px;
+  font-weight: 600;
   color: #6b8ab5;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
 }
 
 /* Drag Handle */

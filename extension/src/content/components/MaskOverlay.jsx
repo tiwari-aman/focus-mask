@@ -8,6 +8,7 @@ function MaskOverlay({
   onRemoveArea,
   onResizeArea,
   blockInteraction,
+  zoomRatio = 1,
 }) {
   return (
     <>
@@ -29,6 +30,7 @@ function MaskOverlay({
             key={index}
             area={area}
             index={index}
+            zoomRatio={zoomRatio}
             onRemove={() => onRemoveArea(index)}
             onResize={(newArea) => onResizeArea(index, newArea)}
           />
@@ -165,7 +167,7 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
   );
 }
 
-function FocusAreaOutline({ area, index, onRemove, onResize }) {
+function FocusAreaOutline({ area, index, onRemove, onResize, zoomRatio = 1 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -174,6 +176,23 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
   const [startArea, setStartArea] = useState(null);
   const hoverTimeoutRef = React.useRef(null);
   const isInteractingRef = React.useRef(false);
+
+  const zoom = zoomRatio || 1;
+  const invZoom = 1 / zoom;
+
+  // Sizing scaled inversely with zoom to maintain constant physical size on monitor
+  const handleSize = 10 * invZoom;
+  const btnOffset = 18 * invZoom;
+  const btnRadius = 12 * invZoom;
+  const dragBtnOffsetY = 25 * invZoom;
+  const dragPillWidth = 36 * invZoom;
+  const dragPillHeight = 20 * invZoom;
+  const dragPillRx = 10 * invZoom;
+  const strokeOutline = 2 * invZoom;
+  const strokeGlow = 4 * invZoom;
+  const rx = 6 * invZoom;
+  const borderWidth = 15 * invZoom;
+  const fontSize = 16 * invZoom;
 
   const handleMouseEnter = useCallback(() => {
     // Clear any pending hide timeout
@@ -253,7 +272,7 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
   useEffect(() => {
     if (!isResizing || !startArea) return;
 
-    const handleMouseMove = (e) => {
+    const handleMove = (e) => {
       const deltaX = e.clientX - startPos.x;
       const deltaY = e.clientY - startPos.y;
 
@@ -299,18 +318,22 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       onResize(newArea);
     };
 
-    const handleMouseUp = () => {
+    const handleUp = () => {
       setIsResizing(false);
       setResizeHandle(null);
       setStartArea(null);
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleUp);
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp);
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleUp);
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleUp);
     };
   }, [isResizing, resizeHandle, startPos, startArea, onResize]);
 
@@ -318,7 +341,7 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
   useEffect(() => {
     if (!isDragging || !startArea) return;
 
-    const handleMouseMove = (e) => {
+    const handleMove = (e) => {
       const deltaX = e.clientX - startPos.x;
       const deltaY = e.clientY - startPos.y;
 
@@ -330,7 +353,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       const viewportHeight = window.innerHeight;
 
       // Constrain to viewport boundaries
-      // Ensure area stays within the window
       newX = Math.max(0, Math.min(newX, viewportWidth - startArea.width));
       newY = Math.max(0, Math.min(newY, viewportHeight - startArea.height));
 
@@ -343,30 +365,33 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       onResize(newArea);
     };
 
-    const handleMouseUp = () => {
+    const handleUp = () => {
       setIsDragging(false);
       setStartArea(null);
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleUp);
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp);
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleUp);
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleUp);
     };
   }, [isDragging, startPos, startArea, onResize]);
 
-  // Position delete button further away from top-right corner to avoid overlapping resize handle
-  const btnX = area.x + area.width + 18;
-  const btnY = area.y - 18;
+  // Position delete button further away from top-right corner
+  const btnX = area.x + area.width + btnOffset;
+  const btnY = area.y - btnOffset;
 
   // Position drag handle at bottom center, inside the selection
   const dragBtnX = area.x + area.width / 2;
-  const dragBtnY = area.y + area.height - 25;
+  const dragBtnY = area.y + area.height - dragBtnOffsetY;
 
   // Resize handle positions
-  const handleSize = 10;
   const handles = [
     {
       id: "nw",
@@ -394,9 +419,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
     },
   ];
 
-  // Border width for hover detection
-  const borderWidth = 15;
-
   return (
     <g
       className={`focusmask-area-group ${isResizing ? "resizing" : ""} ${
@@ -406,7 +428,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       onMouseLeave={handleMouseLeave}
     >
       {/* Extended hover areas outside the selection for detecting mouse near edges */}
-      {/* Top border hover area */}
       <rect
         className="focusmask-hover-border"
         x={area.x - borderWidth}
@@ -415,7 +436,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         height={borderWidth}
         fill="transparent"
       />
-      {/* Bottom border hover area */}
       <rect
         className="focusmask-hover-border"
         x={area.x - borderWidth}
@@ -424,7 +444,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         height={borderWidth}
         fill="transparent"
       />
-      {/* Left border hover area */}
       <rect
         className="focusmask-hover-border"
         x={area.x - borderWidth}
@@ -433,7 +452,6 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         height={area.height}
         fill="transparent"
       />
-      {/* Right border hover area */}
       <rect
         className="focusmask-hover-border"
         x={area.x + area.width}
@@ -452,8 +470,8 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         height={area.height}
         fill="none"
         stroke="rgba(74, 122, 181, 0.25)"
-        strokeWidth="4"
-        rx="6"
+        strokeWidth={strokeGlow}
+        rx={rx}
         style={{ filter: "blur(2px)" }}
       />
       <rect
@@ -464,24 +482,25 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         height={area.height}
         fill="none"
         stroke="#4a7ab5"
-        strokeWidth="2"
-        rx="6"
+        strokeWidth={strokeOutline}
+        rx={rx}
       />
 
-      {/* Resize handles at corners - with larger hit areas */}
+      {/* Resize handles at corners - with scaled hit areas */}
       {handles.map((handle) => (
         <g key={handle.id}>
-          {/* Larger invisible hit area for easier interaction */}
+          {/* Invisible hit area for easier interaction */}
           <rect
-            x={handle.x - 8}
-            y={handle.y - 8}
-            width={handleSize + 16}
-            height={handleSize + 16}
+            x={handle.x - 8 * invZoom}
+            y={handle.y - 8 * invZoom}
+            width={handleSize + 16 * invZoom}
+            height={handleSize + 16 * invZoom}
             fill="transparent"
             style={{ cursor: handle.cursor, pointerEvents: "all" }}
             onMouseEnter={handleInteractiveEnter}
             onMouseLeave={handleInteractiveLeave}
             onMouseDown={(e) => handleResizeStart(e, handle.id)}
+            onPointerDown={(e) => handleResizeStart(e, handle.id)}
           />
           {/* Visible handle */}
           <rect
@@ -494,22 +513,21 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
             height={handleSize}
             fill="#4a7ab5"
             stroke="white"
-            strokeWidth="2"
-            rx="3"
+            strokeWidth={strokeOutline}
+            rx={3 * invZoom}
             style={{ cursor: handle.cursor, pointerEvents: "none" }}
           />
         </g>
       ))}
 
-      {/* Delete button - separate from CSS opacity control to avoid flicker */}
-      {/* Hit area is always active, only visual elements change opacity */}
+      {/* Delete button */}
       <g style={{ cursor: "pointer" }}>
-        {/* Invisible hit area - sized to not overlap with resize handles */}
+        {/* Invisible hit area */}
         <rect
-          x={btnX - 15}
-          y={btnY - 15}
-          width="30"
-          height="30"
+          x={btnX - 15 * invZoom}
+          y={btnY - 15 * invZoom}
+          width={30 * invZoom}
+          height={30 * invZoom}
           fill="transparent"
           onMouseEnter={handleInteractiveEnter}
           onMouseLeave={handleInteractiveLeave}
@@ -518,14 +536,14 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
             onRemove();
           }}
         />
-        {/* Visible delete button - opacity controlled inline, not via CSS class */}
+        {/* Visible delete button */}
         <circle
           cx={btnX}
           cy={btnY}
-          r="12"
+          r={btnRadius}
           fill="#ff4444"
           stroke="white"
-          strokeWidth="2"
+          strokeWidth={strokeOutline}
           style={{
             pointerEvents: "none",
             opacity: isHovered || isResizing ? 1 : 0,
@@ -534,11 +552,11 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
         />
         <text
           x={btnX}
-          y={btnY + 1}
+          y={btnY + 1 * invZoom}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="white"
-          fontSize="16"
+          fontSize={fontSize}
           fontWeight="bold"
           style={{
             pointerEvents: "none",
@@ -554,25 +572,26 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
       <g style={{ cursor: isDragging ? "grabbing" : "grab" }}>
         {/* Invisible hit area for drag handle */}
         <rect
-          x={dragBtnX - 20}
-          y={dragBtnY - 12}
-          width="40"
-          height="24"
+          x={dragBtnX - 20 * invZoom}
+          y={dragBtnY - 12 * invZoom}
+          width={40 * invZoom}
+          height={24 * invZoom}
           fill="transparent"
           onMouseEnter={handleInteractiveEnter}
           onMouseLeave={handleInteractiveLeave}
           onMouseDown={handleDragStart}
+          onPointerDown={handleDragStart}
         />
         {/* Visible drag handle - pill shaped */}
         <rect
-          x={dragBtnX - 18}
-          y={dragBtnY - 10}
-          width="36"
-          height="20"
-          rx="10"
+          x={dragBtnX - dragPillWidth / 2}
+          y={dragBtnY - dragPillHeight / 2}
+          width={dragPillWidth}
+          height={dragPillHeight}
+          rx={dragPillRx}
           fill="#4a7ab5"
           stroke="white"
-          strokeWidth="2"
+          strokeWidth={strokeOutline}
           style={{
             pointerEvents: "none",
             opacity: isHovered || isResizing || isDragging ? 1 : 0,
@@ -588,33 +607,41 @@ function FocusAreaOutline({ area, index, onRemove, onResize }) {
           }}
         >
           {/* Center dot */}
-          <circle cx={dragBtnX} cy={dragBtnY} r="1.5" fill="white" />
+          <circle cx={dragBtnX} cy={dragBtnY} r={1.5 * invZoom} fill="white" />
           {/* Left arrow */}
           <path
-            d={`M${dragBtnX - 10} ${dragBtnY} L${dragBtnX - 6} ${
-              dragBtnY - 3
-            } L${dragBtnX - 6} ${dragBtnY + 3} Z`}
+            d={`M${dragBtnX - 10 * invZoom} ${dragBtnY} L${
+              dragBtnX - 6 * invZoom
+            } ${dragBtnY - 3 * invZoom} L${dragBtnX - 6 * invZoom} ${
+              dragBtnY + 3 * invZoom
+            } Z`}
             fill="white"
           />
           {/* Right arrow */}
           <path
-            d={`M${dragBtnX + 10} ${dragBtnY} L${dragBtnX + 6} ${
-              dragBtnY - 3
-            } L${dragBtnX + 6} ${dragBtnY + 3} Z`}
+            d={`M${dragBtnX + 10 * invZoom} ${dragBtnY} L${
+              dragBtnX + 6 * invZoom
+            } ${dragBtnY - 3 * invZoom} L${dragBtnX + 6 * invZoom} ${
+              dragBtnY + 3 * invZoom
+            } Z`}
             fill="white"
           />
           {/* Up arrow */}
           <path
-            d={`M${dragBtnX} ${dragBtnY - 6} L${dragBtnX - 3} ${
-              dragBtnY - 3
-            } L${dragBtnX + 3} ${dragBtnY - 3} Z`}
+            d={`M${dragBtnX} ${dragBtnY - 6 * invZoom} L${
+              dragBtnX - 3 * invZoom
+            } ${dragBtnY - 3 * invZoom} L${dragBtnX + 3 * invZoom} ${
+              dragBtnY - 3 * invZoom
+            } Z`}
             fill="white"
           />
           {/* Down arrow */}
           <path
-            d={`M${dragBtnX} ${dragBtnY + 6} L${dragBtnX - 3} ${
-              dragBtnY + 3
-            } L${dragBtnX + 3} ${dragBtnY + 3} Z`}
+            d={`M${dragBtnX} ${dragBtnY + 6 * invZoom} L${
+              dragBtnX - 3 * invZoom
+            } ${dragBtnY + 3 * invZoom} L${dragBtnX + 3 * invZoom} ${
+              dragBtnY + 3 * invZoom
+            } Z`}
             fill="white"
           />
         </g>

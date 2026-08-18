@@ -42,6 +42,7 @@ function FloatingToolbarExpanded({
           className="focusmask-drag-handle"
           data-tooltip="Drag to reposition"
           onMouseDown={onMouseDown}
+          onPointerDown={onMouseDown}
         >
           <svg
             viewBox="0 0 24 24"

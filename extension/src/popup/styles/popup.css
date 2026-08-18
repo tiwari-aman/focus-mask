@@ -455,3 +455,32 @@ body {
   line-height: 1.5;
   max-width: 240px;
 }
+
+.file-access-icon {
+  color: #82b8f9;
+}
+
+.file-settings-btn {
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #4a7ab5, #3a6298);
+  border: 1px solid rgba(130, 184, 249, 0.4);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.file-settings-btn:hover {
+  background: linear-gradient(135deg, #5b8dc9, #4a7ab5);
+  border-color: rgba(130, 184, 249, 0.7);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(130, 184, 249, 0.3);
+}
+
+.file-settings-btn:active {
+  transform: translateY(0);
+}

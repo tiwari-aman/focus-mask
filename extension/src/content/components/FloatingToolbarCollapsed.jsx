@@ -13,6 +13,7 @@ function FloatingToolbarCollapsed({ onClick, onMouseDown }) {
         onClick();
       }}
       onMouseDown={onMouseDown}
+      onPointerDown={onMouseDown}
       title="Open Focus Mask Toolbar"
       style={{ borderRadius: "12px" }} // Squircle for smaller icon
     >

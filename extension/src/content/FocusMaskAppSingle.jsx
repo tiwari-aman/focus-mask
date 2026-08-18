@@ -28,7 +28,35 @@ function FocusMaskAppSingle() {
   const [state, setState] = useState(DEFAULT_STATE);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentRect, setCurrentRect] = useState(null);
+  const [zoomRatio, setZoomRatio] = useState(1);
   const startPosRef = useRef({ x: 0, y: 0 });
+
+  // Track page zoom level in real-time
+  useEffect(() => {
+    const updateZoom = () => {
+      let zoom = 1;
+      if (
+        window.visualViewport &&
+        window.visualViewport.scale &&
+        window.visualViewport.scale !== 1
+      ) {
+        zoom = window.visualViewport.scale;
+      } else if (window.outerWidth && window.innerWidth) {
+        zoom = window.outerWidth / window.innerWidth;
+      }
+      zoom = Math.max(0.25, Math.min(5, zoom));
+      setZoomRatio(zoom);
+    };
+
+    updateZoom();
+    window.addEventListener("resize", updateZoom);
+    window.visualViewport?.addEventListener("resize", updateZoom);
+
+    return () => {
+      window.removeEventListener("resize", updateZoom);
+      window.visualViewport?.removeEventListener("resize", updateZoom);
+    };
+  }, []);
 
   // Check if maximum areas limit is reached
   const hasReachedLimit = state.areas.length >= MAX_FOCUS_AREAS;
@@ -100,6 +128,94 @@ function FocusMaskAppSingle() {
     state.areas,
   );
 
+  // Handle window resize and zoom adjustments (scales area to maintain constant physical screen size)
+  useEffect(() => {
+    if (!state.enabled || state.areas.length === 0) return;
+
+    const handleResize = () => {
+      const curVw = window.innerWidth;
+      const curVh = window.innerHeight;
+
+      if (!curVw || !curVh) return;
+
+      let changed = false;
+      const scaledAreas = state.areas.map((area) => {
+        const prevVw = area.vw || curVw;
+        const prevVh = area.vh || curVh;
+
+        if (prevVw === curVw && prevVh === curVh) {
+          return area;
+        }
+
+        const scaleX = curVw / prevVw;
+        const scaleY = curVh / prevVh;
+
+        let width = Math.round(area.width * scaleX);
+        let height = Math.round(area.height * scaleY);
+        let x = Math.round(area.x * scaleX);
+        let y = Math.round(area.y * scaleY);
+
+        // Clamp to current viewport
+        width = Math.min(width, curVw);
+        height = Math.min(height, curVh);
+        x = Math.max(0, Math.min(x, curVw - width));
+        y = Math.max(0, Math.min(y, curVh - height));
+
+        changed = true;
+        return {
+          ...area,
+          x,
+          y,
+          width,
+          height,
+          vw: curVw,
+          vh: curVh,
+        };
+      });
+
+      if (changed) {
+        updateState({ areas: scaledAreas });
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, [state.enabled, state.areas, updateState]);
+
+  // Handle Esc key to cancel draw mode or clear areas
+  useEffect(() => {
+    if (!state.enabled) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" || e.key === "Esc" || e.keyCode === 27) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (state.drawMode) {
+          setIsDrawing(false);
+          setCurrentRect(null);
+          updateState({ drawMode: false });
+        } else if (state.areas && state.areas.length > 0) {
+          updateState({ areas: [] });
+        }
+      }
+    };
+
+    // Use capture phase to intercept Esc before host page
+    window.addEventListener("keydown", handleKeyDown, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [state.enabled, state.drawMode, state.areas, updateState]);
+
   // Check if point is inside any area
   const isPointInAnyArea = useCallback(
     (x, y) => {
@@ -158,9 +274,14 @@ function FocusMaskAppSingle() {
     setIsDrawing(false);
 
     if (currentRect.width > 20 && currentRect.height > 20) {
+      const newArea = {
+        ...currentRect,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
       // In single focus mode, replace existing area instead of adding
       updateState({
-        areas: [currentRect],
+        areas: [newArea],
         drawMode: false, // Auto-disable draw mode after creating the single area
       });
     }
@@ -199,8 +320,13 @@ function FocusMaskAppSingle() {
 
   const resizeArea = useCallback(
     (index, newArea) => {
+      const areaWithVw = {
+        ...newArea,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
       const newAreas = state.areas.map((area, i) =>
-        i === index ? newArea : area,
+        i === index ? areaWithVw : area,
       );
       updateState({ areas: newAreas });
     },
@@ -244,6 +370,7 @@ function FocusMaskAppSingle() {
             onRemoveArea={removeArea}
             onResizeArea={resizeArea}
             blockInteraction={state.blockInteraction}
+            zoomRatio={zoomRatio}
           />
           <DrawingArea
             active={state.drawMode && !hasReachedLimit}
@@ -263,6 +390,7 @@ function FocusMaskAppSingle() {
         darkness={state.darkness}
         blockInteraction={state.blockInteraction}
         hasReachedLimit={hasReachedLimit}
+        zoomRatio={zoomRatio}
         onToggle={toggleEnabled}
         onToggleMaskActive={toggleMaskActive}
         onToggleDrawMode={toggleDrawMode}

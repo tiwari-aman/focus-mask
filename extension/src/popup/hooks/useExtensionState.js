@@ -45,6 +45,7 @@ function useExtensionState() {
   const [state, setState] = useState(DEFAULT_STATE);
   const [loading, setLoading] = useState(true);
   const [siteRestricted, setSiteRestricted] = useState(false);
+  const [isFileWithoutAccess, setIsFileWithoutAccess] = useState(false);
   const [currentTabId, setCurrentTabId] = useState(null);
 
   // Load state for current tab on mount
@@ -58,6 +59,20 @@ function useExtensionState() {
 
         if (tab?.id) {
           setCurrentTabId(tab.id);
+
+          // Check for local file URLs without file scheme access
+          if (tab.url && tab.url.startsWith("file://")) {
+            if (chrome.extension?.isAllowedFileSchemeAccess) {
+              const isAllowed = await new Promise((resolve) => {
+                chrome.extension.isAllowedFileSchemeAccess(resolve);
+              });
+              if (!isAllowed) {
+                setIsFileWithoutAccess(true);
+                setLoading(false);
+                return;
+              }
+            }
+          }
 
           // Check if the URL is restricted
           if (isRestrictedUrl(tab.url)) {
@@ -151,6 +166,7 @@ function useExtensionState() {
     state,
     loading,
     siteRestricted,
+    isFileWithoutAccess,
     currentTabId,
     updateState,
     saveState,

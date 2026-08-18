@@ -16,7 +16,19 @@ function mount() {
   container.id = "focusmask-root";
   document.documentElement.appendChild(container);
 
-  root = createRoot(container);
+  const shadowRoot = container.attachShadow({ mode: "open" });
+
+  // Link stylesheet inside shadow DOM for isolated CSS styling
+  const styleLink = document.createElement("link");
+  styleLink.rel = "stylesheet";
+  styleLink.href = chrome.runtime.getURL("content.css");
+  shadowRoot.appendChild(styleLink);
+
+  const reactMountPoint = document.createElement("div");
+  reactMountPoint.className = "focusmask-shadow-container";
+  shadowRoot.appendChild(reactMountPoint);
+
+  root = createRoot(reactMountPoint);
   root.render(<FocusMaskApp />);
 }
 

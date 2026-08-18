@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Mask - Comprehensive Test Suite</title>
+  <style>
+    /* Base Page Styling */
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .header {
+      max-width: 900px;
+      margin: 0 auto 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      color: var(--accent);
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .test-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .test-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .test-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .test-card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .test-card p {
+      margin: 0 0 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .instructions {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .instructions ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 4px;
+    }
+
+    /* Test 2: Hostile CSS Simulation Area */
+    .hostile-css-container {
+      background: #ffffff;
+      color: #000000;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    
+    /* Aggressive global styles applied specifically inside this demo section */
+    .hostile-css-container * {
+      box-sizing: content-box !important;
+      font-family: "Courier New", Courier, monospace !important;
+      letter-spacing: 2px !important;
+    }
+
+    /* Test 3: High Z-Index Elements */
+    .simulated-cookie-banner {
+      position: relative;
+      background: linear-gradient(90deg, #dc2626, #b91c1c);
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      z-index: 999999;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    }
+
+    .simulated-chat-widget {
+      position: relative;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 10px;
+      z-index: 2000000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Test 4: Focus Target Box */
+    .target-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 2px dashed var(--accent);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Test 5: Live Viewport Indicators */
+    .viewport-stat {
+      display: inline-block;
+      background: #0f172a;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      color: var(--accent);
+      margin-right: 10px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Focus Mask - Test Suite</h1>
+    <p>Use this interactive page to verify the 5 core improvements in real-world browser conditions.</p>
+  </div>
+
+  <div class="test-grid">
+
+    <!-- Test 1: Local File (file://) Access -->
+    <div class="test-card">
+      <span class="test-badge">Test 1</span>
+      <h2>Local File Protocol (file://) & Popup Helper</h2>
+      <p>Verifies that Focus Mask detects local file URLs and guides the user cleanly.</p>
+      
+      <div class="instructions">
+        <ol>
+          <li>Open this file directly in Chrome (URL starts with <code>file:///...</code>).</li>
+          <li>Click the <strong>Focus Mask icon</strong> in the browser toolbar.</li>
+          <li><strong>Expected Result:</strong> If file URL access is OFF, the popup displays <em>"Local File Detected"</em> with an <em>"Open Extension Settings"</em> button.</li>
+          <li>Click the button, turn ON <em>"Allow access to file URLs"</em>, refresh this tab, and verify Focus Mask activates normally.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Test 2: Shadow DOM CSS Isolation -->
+    <div class="test-card">
+      <span class="test-badge">Test 2</span>
+      <h2>Shadow DOM CSS Isolation</h2>
+      <p>Verifies that host website stylesheets and CSS resets never distort Focus Mask's toolbar, sliders, or icons.</p>
+      
+      <div class="instructions">
+        <ol>
+          <li>Enable Focus Mask and ensure the Floating Toolbar is visible.</li>
+          <li>Drag the Floating Toolbar over the hostile box below.</li>
+          <li><strong>Expected Result:</strong> Focus Mask's buttons, sliders, fonts, and dark theme remain pixel-perfect and unaffected by the page's aggressive CSS rules (<code>box-sizing: content-box</code>, monospace fonts, etc.).</li>
+        </ol>
+      </div>
+
+      <div class="hostile-css-container">
+        ⚠️ <strong>Hostile CSS Test Box</strong> (Has aggressive <code>content-box</code> and font overrides applied to all child nodes).
+      </div>
+    </div>
+
+    <!-- Test 3: High Z-Index Layering -->
+    <div class="test-card">
+      <span class="test-badge">Test 3</span>
+      <h2>Maximum Z-Index Protection (2147483647)</h2>
+      <p>Verifies that high z-index elements (cookie banners, sticky headers, chat widgets) stay behind the blur mask.</p>
+
+      <div class="instructions">
+        <ol>
+          <li>Activate Focus Mask and draw a focus area in the middle of the screen.</li>
+          <li>Observe the elements below with <code>z-index: 999999</code> and <code>z-index: 2000000000</code>.</li>
+          <li><strong>Expected Result:</strong> Both high-z-index boxes are blurred and darkened by Focus Mask and do not poke through the overlay.</li>
+        </ol>
+      </div>
+
+      <div class="simulated-cookie-banner">
+        🍪 High Z-Index Cookie Banner (z-index: 999,999)
+      </div>
+
+      <div class="simulated-chat-widget">
+        💬 High Z-Index Customer Chat Widget (z-index: 2,000,000,000)
+        <button style="background: white; color: #6d28d9; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">Chat Now</button>
+      </div>
+    </div>
+
+    <!-- Test 4: Pointer Events & Dragging -->
+    <div class="test-card">
+      <span class="test-badge">Test 4</span>
+      <h2>Pointer Events (Mouse, Touch & Stylus)</h2>
+      <p>Verifies uniform drawing, resizing, and dragging across all input devices.</p>
+
+      <div class="instructions">
+        <ol>
+          <li>Click the <strong>Draw</strong> button on the Focus Mask toolbar.</li>
+          <li>Click and drag to draw a box around the Target Reading Area below (try with mouse, trackpad, or touchscreen/stylus).</li>
+          <li>Try dragging the box using the bottom drag handle, or resizing it using the corner handles.</li>
+          <li>Press the <kbd>Esc</kbd> key while in drawing mode to verify it cancels drawing smoothly.</li>
+        </ol>
+      </div>
+
+      <div class="target-box">
+        <h3>🎯 Target Reading Area</h3>
+        <p>Try highlighting only this dashed box with Focus Mask!</p>
+      </div>
+    </div>
+
+    <!-- Test 5: Zoom & Window Resize Clamping -->
+    <div class="test-card">
+      <span class="test-badge">Test 5</span>
+      <h2>Window Resize & Zoom Clamping</h2>
+      <p>Verifies that the focus mask remains responsive and clamped inside visible viewport bounds when zooming or resizing.</p>
+
+      <div class="instructions">
+        <ol>
+          <li>Draw a focus area anywhere on this page.</li>
+          <li>Zoom in and out (<kbd>Cmd +</kbd> / <kbd>Cmd -</kbd> or <kbd>Ctrl +</kbd> / <kbd>Ctrl -</kbd>).</li>
+          <li>Resize your browser window smaller.</li>
+          <li><strong>Expected Result:</strong> The focus area automatically clamps within the visible screen and never gets lost or pushed off-screen.</li>
+        </ol>
+      </div>
+
+      <div>
+        <span class="viewport-stat" id="viewport-width">Width: -- px</span>
+        <span class="viewport-stat" id="viewport-height">Height: -- px</span>
+        <span class="viewport-stat" id="viewport-zoom">Zoom Level: 100%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Live viewport & zoom stats updater
+    function updateStats() {
+      const widthEl = document.getElementById("viewport-width");
+      const heightEl = document.getElementById("viewport-height");
+      const zoomEl = document.getElementById("viewport-zoom");
+
+      if (widthEl) widthEl.textContent = `Width: ${window.innerWidth} px`;
+      if (heightEl) heightEl.textContent = `Height: ${window.innerHeight} px`;
+      
+      const zoom = Math.round((window.outerWidth / window.innerWidth) * 100);
+      if (zoomEl) zoomEl.textContent = `Scale: ~${zoom}%`;
+    }
+
+    window.addEventListener("resize", updateStats);
+    updateStats();
+  </script>
+</body>
+</html>
