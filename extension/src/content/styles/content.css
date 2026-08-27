@@ -1231,8 +1231,10 @@
 }
 
 .focusmask-toolbar-container.closing .focusmask-floating-expanded {
-  /* When closing, anchor to right so it shrinks leftwards */
-  transform-origin: right center !important;
+  /* Anchor matches the container's fixed left edge, where the collapsed
+     icon reappears - keeps collapse/expand feeling like one continuous
+     scale instead of jumping sides */
+  transform-origin: left center !important;
 }
 
 /* ============================================
@@ -1297,7 +1299,7 @@
 /* Reset any previous complex animations */
 .focusmask-toolbar-container.closing .focusmask-floating-expanded {
   animation: cleanExit 0.2s ease-in forwards !important;
-  transform-origin: right center !important; /* Shrinks towards the close button */
+  transform-origin: left center !important; /* Matches container's fixed left anchor */
   overflow: hidden;
 }
 

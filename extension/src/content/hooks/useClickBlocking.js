@@ -4,6 +4,17 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
   // Track mouse position in viewport coordinates
   const mousePositionRef = useRef({ x: 0, y: 0 });
 
+  // Get the true originating element for an event, bypassing Shadow DOM
+  // retargeting (a document-level listener otherwise sees the shadow host
+  // as e.target instead of the actual element that was interacted with)
+  const getRealTarget = useCallback((e) => {
+    if (e.composedPath) {
+      const path = e.composedPath();
+      if (path.length > 0) return path[0];
+    }
+    return e.target;
+  }, []);
+
   // Check if viewport point (clientX/Y) is inside any focus area
   // Areas are rendered with position:fixed, so they stay in viewport position
   // We compare viewport coordinates directly
@@ -85,22 +96,24 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
     };
 
     const handleBlockedClick = (e) => {
+      const realTarget = getRealTarget(e);
+
       // Allow clicks on toolbar (new floating toolbar classes)
       if (
-        e.target.closest(".focusmask-toolbar-container") ||
-        e.target.closest(".focusmask-floating-expanded") ||
-        e.target.closest(".focusmask-floating-collapsed")
+        realTarget.closest?.(".focusmask-toolbar-container") ||
+        realTarget.closest?.(".focusmask-floating-expanded") ||
+        realTarget.closest?.(".focusmask-floating-collapsed")
       )
         return;
 
       // Allow clicks on any FocusMask SVG elements (delete buttons, resize handles, etc.)
-      if (e.target.closest(".focusmask-svg")) return;
+      if (realTarget.closest?.(".focusmask-svg")) return;
 
       // Allow clicks on FocusMask container elements
-      if (e.target.closest(".focusmask-container")) return;
+      if (realTarget.closest?.(".focusmask-container")) return;
 
       // Allow clicks on FocusMask area groups
-      if (e.target.closest(".focusmask-area-group")) return;
+      if (realTarget.closest?.(".focusmask-area-group")) return;
 
       // Allow clicks during draw mode
       if (drawMode) return;
@@ -123,7 +136,7 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
     };
 
     const handleBlockedScroll = (e) => {
-      if (e.target.closest(".focusmask-toolbar")) return;
+      if (getRealTarget(e).closest?.(".focusmask-toolbar-container")) return;
       if (drawMode) return;
       if (areas.length === 0) return;
 
@@ -153,7 +166,7 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
     };
 
     const handleBlockedKeyboard = (e) => {
-      if (e.target.closest(".focusmask-toolbar")) return;
+      if (getRealTarget(e).closest?.(".focusmask-toolbar-container")) return;
       if (drawMode) return;
 
       const scrollKeys = [32, 33, 34, 35, 36, 37, 38, 39, 40];
@@ -203,7 +216,7 @@ function useClickBlocking(enabled, blockInteraction, drawMode, areas) {
       document.removeEventListener("touchmove", handleBlockedScroll, true);
       document.removeEventListener("keydown", handleBlockedKeyboard, true);
     };
-  }, [enabled, blockInteraction, drawMode, isViewportPointInAnyArea]);
+  }, [enabled, blockInteraction, drawMode, isViewportPointInAnyArea, getRealTarget]);
 }
 
 export default useClickBlocking;

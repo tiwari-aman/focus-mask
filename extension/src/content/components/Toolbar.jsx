@@ -150,30 +150,6 @@ function Toolbar({
     }, 250);
   }, [collapsed, isClosing]);
 
-  // Collapse when clicking outside (using composedPath for Shadow DOM compatibility)
-  useEffect(() => {
-    if (collapsed) return;
-
-    // Don't auto-collapse if drawing mode is active
-    if (drawMode) return;
-
-    const handleClickOutside = (event) => {
-      if (isDragging) return;
-      const path = event.composedPath ? event.composedPath() : [];
-      const isInside =
-        toolbarRef.current &&
-        (toolbarRef.current.contains(event.target) ||
-          path.includes(toolbarRef.current));
-
-      if (!isInside) {
-        handleCollapse();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [collapsed, drawMode, isDragging, handleCollapse]);
-
   const handleExpand = () => {
     if (hasMoved.current) return;
 
