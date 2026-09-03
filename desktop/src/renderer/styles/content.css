@@ -1,0 +1,1465 @@
+/* Focus Mask Content Script Styles */
+
+/* Root container & Shadow DOM Host */
+:host,
+#focusmask-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483647 !important;
+  pointer-events: none;
+}
+
+.focusmask-shadow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483647 !important;
+  pointer-events: none;
+}
+
+/* Main container - hidden by default */
+.focusmask-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 10;
+  display: none;
+}
+
+.focusmask-container.visible {
+  display: block;
+}
+
+/* Mask overlay container */
+.focusmask-mask-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 1;
+}
+
+/* Individual blur sections */
+.focusmask-blur-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+}
+
+/* SVG layer */
+.focusmask-svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 2;
+  overflow: visible;
+}
+
+/* Preview SVG */
+.focusmask-preview-svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 3;
+  overflow: visible;
+}
+
+/* Area group - captures hover events on the group level */
+.focusmask-area-group {
+  pointer-events: auto !important;
+}
+
+.focusmask-area-group.resizing {
+  pointer-events: auto !important;
+}
+
+.focusmask-area-group.dragging {
+  pointer-events: auto !important;
+}
+
+/* Draggable center area */
+.focusmask-drag-area {
+  pointer-events: auto !important;
+  /* cursor: grab; */
+}
+
+.focusmask-drag-area:active {
+  cursor: grabbing;
+}
+
+.focusmask-area-group.dragging .focusmask-drag-area {
+  cursor: grabbing;
+}
+
+/* Full hover area for stable interaction - but allow clicks through */
+.focusmask-hover-area {
+  pointer-events: none !important;
+  cursor: default;
+}
+
+/* Hover border areas - only on edges, not covering center */
+.focusmask-hover-border {
+  pointer-events: auto !important;
+  cursor: default;
+}
+
+/* Outlines around focus areas */
+.focusmask-outline-glow {
+  pointer-events: none !important;
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease;
+}
+
+.focusmask-outline {
+  pointer-events: none !important;
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease;
+}
+
+.focusmask-area-group.hovered .focusmask-outline-glow,
+.focusmask-area-group.resizing .focusmask-outline-glow,
+.focusmask-area-group.dragging .focusmask-outline-glow {
+  stroke: rgba(74, 122, 181, 0.35);
+  stroke-width: 5;
+}
+
+.focusmask-area-group.hovered .focusmask-outline,
+.focusmask-area-group.resizing .focusmask-outline,
+.focusmask-area-group.dragging .focusmask-outline {
+  stroke: #6b9bd1;
+  stroke-width: 2.5;
+}
+
+/* Resize handles at corners */
+.focusmask-resize-handle {
+  pointer-events: none !important;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+.focusmask-resize-handle.visible,
+.focusmask-area-group.hovered .focusmask-resize-handle,
+.focusmask-area-group.resizing .focusmask-resize-handle,
+.focusmask-area-group.dragging .focusmask-resize-handle {
+  opacity: 1;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+/* Delete button hover effect */
+.focusmask-delete-btn:hover circle {
+  transform: scale(1.1);
+}
+
+.focusmask-delete-btn circle {
+  transition: fill 0.15s ease;
+}
+
+.focusmask-delete-btn:hover circle {
+  fill: #ff6666;
+}
+
+/* Preview rectangle during drawing */
+.focusmask-preview {
+  pointer-events: none !important;
+}
+
+/* Drawing area */
+.focusmask-drawing-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 999999;
+  cursor: default;
+}
+
+.focusmask-drawing-area.active {
+  pointer-events: auto !important;
+  /* Custom crosshair cursor - visible on both dark and light backgrounds */
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 2v8M12 14v8M2 12h8M14 12h8' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M12 2v8M12 14v8M2 12h8M14 12h8' stroke='%234a7ab5' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%234a7ab5' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E")
+      12 12,
+    crosshair;
+  background: rgba(74, 158, 255, 0.03);
+}
+
+/* ============================================
+   TOOLBAR - Professional Modern Design
+   ============================================ */
+
+.focusmask-toolbar {
+  position: fixed;
+  background: linear-gradient(
+    145deg,
+    rgba(23, 32, 48, 0.98),
+    rgba(13, 18, 30, 0.98)
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(130, 184, 249, 0.35);
+  border-radius: 14px;
+  padding: 12px;
+  min-width: 200px;
+  max-width: 220px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(130, 184, 249, 0.15) inset,
+    0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  z-index: 99999999;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  color: #ffffff;
+  user-select: none;
+  display: none;
+  pointer-events: auto !important;
+}
+
+.focusmask-toolbar.visible {
+  display: block;
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.focusmask-toolbar.dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
+.focusmask-toolbar.collapsed {
+  min-width: 200px;
+  max-width: 200px;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Toolbar header - Compact and draggable */
+.focusmask-toolbar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 10px;
+  border-bottom: 1px solid rgba(130, 184, 249, 0.25);
+  margin-bottom: 10px;
+  /* cursor: grab; */
+  user-select: none;
+  margin-top: -2px;
+  transition: background 0.15s ease;
+  margin-left: -12px;
+  margin-right: -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 12px 12px 0 0;
+}
+
+.focusmask-toolbar-header:hover {
+  background: rgba(130, 184, 249, 0.1);
+}
+
+.focusmask-toolbar.dragging .focusmask-toolbar-header {
+  cursor: grabbing;
+  background: rgba(130, 184, 249, 0.15);
+}
+
+.focusmask-toolbar-logo {
+  font-size: 14px;
+}
+
+.focusmask-toolbar-logo-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.focusmask-toolbar-title {
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #4a7ab5, #6b9bd1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.focusmask-collapse-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 8px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.focusmask-collapse-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Action buttons - Professional row */
+.focusmask-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(130, 184, 249, 0.15);
+}
+
+.focusmask-action-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.focusmask-action-label {
+  font-size: 9px;
+  color: #6b8ab5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.focusmask-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: linear-gradient(
+    145deg,
+    rgba(40, 52, 72, 0.9),
+    rgba(25, 35, 52, 0.9)
+  );
+  border: 1px solid rgba(130, 184, 249, 0.3);
+  border-radius: 8px;
+  color: #8a9bb5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.focusmask-action-btn:hover {
+  background: linear-gradient(
+    145deg,
+    rgba(50, 65, 88, 0.95),
+    rgba(35, 48, 68, 0.95)
+  );
+  border-color: rgba(130, 184, 249, 0.5);
+  color: #c5d3e8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.focusmask-action-btn.active {
+  background: linear-gradient(
+    145deg,
+    rgba(45, 75, 120, 0.6),
+    rgba(35, 60, 100, 0.6)
+  );
+  border-color: rgba(74, 122, 181, 0.7);
+  color: #82b8f9;
+  box-shadow: 0 0 8px rgba(130, 184, 249, 0.25);
+}
+
+.focusmask-action-btn.disabled,
+.focusmask-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.focusmask-btn-icon {
+  font-size: 14px;
+}
+
+.focusmask-btn-svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+/* Controls - Professional sliders */
+.focusmask-toolbar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(13, 18, 30, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(130, 184, 249, 0.15);
+}
+
+.focusmask-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.focusmask-control-label {
+  font-size: 10px;
+  color: #8a9bb5;
+  min-width: 30px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.focusmask-slider {
+  flex: 1;
+  min-width: 0;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(40, 52, 72, 0.9),
+    rgba(50, 65, 88, 0.9)
+  );
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid rgba(130, 184, 249, 0.2);
+}
+
+.focusmask-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(145deg, #4a7ab5, #3a6298);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.focusmask-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 6px rgba(130, 184, 249, 0.4);
+}
+
+.focusmask-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(145deg, #4a7ab5, #3a6298);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.focusmask-control-value {
+  font-size: 10px;
+  color: #6b9bd1;
+  min-width: 32px;
+  width: 32px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Checkbox row */
+.focusmask-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #8a9bb5;
+  border-top: 1px solid rgba(130, 184, 249, 0.15);
+  margin-top: 4px;
+}
+
+.focusmask-checkbox-row:hover {
+  color: #c5d3e8;
+}
+
+.focusmask-checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4a7ab5;
+  cursor: pointer;
+  margin: 0;
+  border-radius: 4px;
+}
+
+/* Toggle switches section */
+.focusmask-toolbar-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(130, 184, 249, 0.15);
+}
+
+.focusmask-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.focusmask-toggle-label {
+  font-size: 11px;
+  color: #8a9bb5;
+  transition: color 0.15s ease;
+}
+
+.focusmask-toggle-row:hover .focusmask-toggle-label {
+  color: #c5d3e8;
+}
+
+.focusmask-toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.focusmask-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.focusmask-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(40, 52, 72, 0.9);
+  border: 1px solid rgba(130, 184, 249, 0.3);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.focusmask-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background: #8a9bb5;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.focusmask-toggle-switch input:checked + .focusmask-toggle-slider {
+  background: linear-gradient(
+    145deg,
+    rgba(45, 75, 120, 0.8),
+    rgba(35, 60, 100, 0.8)
+  );
+  border-color: rgba(74, 122, 181, 0.6);
+}
+
+.focusmask-toggle-switch input:checked + .focusmask-toggle-slider:before {
+  transform: translateX(16px);
+  background: #82b8f9;
+}
+
+/* Draw mode hint */
+.focusmask-draw-hint {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: linear-gradient(
+    145deg,
+    rgba(45, 75, 120, 0.2),
+    rgba(35, 60, 100, 0.15)
+  );
+  border: 1px solid rgba(130, 184, 249, 0.35);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #82b8f9;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Drag handle */
+.focusmask-toolbar-handle {
+  text-align: center;
+  padding: 10px 0 6px;
+  cursor: grab;
+  color: rgba(74, 122, 181, 0.5);
+  font-size: 14px;
+  letter-spacing: 4px;
+  border-top: 1px solid rgba(130, 184, 249, 0.2);
+  margin-top: 12px;
+  user-select: none;
+  transition: all 0.2s ease;
+  background: linear-gradient(
+    180deg,
+    rgba(25, 35, 52, 0.5),
+    rgba(13, 18, 30, 0.8)
+  );
+  border-radius: 0 0 12px 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -12px;
+  padding-bottom: 10px;
+}
+
+.focusmask-toolbar-handle:hover {
+  color: #6b9bd1;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 52, 72, 0.5),
+    rgba(25, 35, 52, 0.8)
+  );
+}
+
+.focusmask-toolbar.dragging .focusmask-toolbar-handle {
+  cursor: grabbing;
+  background: linear-gradient(
+    180deg,
+    rgba(45, 75, 120, 0.25),
+    rgba(35, 60, 100, 0.2)
+  );
+  color: #6b9bd1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .focusmask-toolbar {
+    min-width: 180px;
+    padding: 10px;
+  }
+}
+
+/* ============================================
+   TAB NAVIGATION (Toolbar only)
+   ============================================ */
+
+/* Tab navigation buttons */
+.focusmask-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  background: rgba(13, 18, 30, 0.6);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid rgba(130, 184, 249, 0.15);
+}
+
+.focusmask-tab {
+  flex: 1;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #8a9bb5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.focusmask-tab:hover {
+  background: rgba(40, 52, 72, 0.5);
+  color: #c5d3e8;
+}
+
+.focusmask-tab.active {
+  background: linear-gradient(
+    145deg,
+    rgba(45, 75, 120, 0.6),
+    rgba(35, 60, 100, 0.6)
+  );
+  border: 1px solid rgba(74, 122, 181, 0.4);
+  color: #82b8f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Tab content area */
+.focusmask-tab-content {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   NEW FLOATING TOOLBAR
+   ============================================ */
+
+.focusmask-toolbar-container {
+  position: fixed;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
+}
+
+.focusmask-floating-collapsed {
+  /* position: absolute; Handled by container */
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #172030, #0d121e);
+  border: 1.5px solid rgba(130, 184, 249, 0.5);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(130, 184, 249, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 99999999;
+  pointer-events: auto !important;
+}
+
+.focusmask-floating-collapsed:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 6px 16px rgba(130, 184, 249, 0.3),
+    0 0 0 1px rgba(130, 184, 249, 0.3);
+  border-color: rgba(130, 184, 249, 0.7);
+}
+
+.focusmask-collapsed-icon {
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  border-radius: 3px;
+}
+
+.focusmask-floating-expanded {
+  /* position: absolute; Handled by container */
+  background: rgba(13, 18, 30, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(130, 184, 249, 0.35);
+  border-radius: 40px; /* Pill shape */
+  padding: 4px 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  animation: expandToolbar 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  pointer-events: auto !important;
+}
+
+@keyframes expandToolbar {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+    width: 40px;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    width: auto;
+  }
+}
+
+.focusmask-floating-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-block: 2px;
+}
+
+.focusmask-floating-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #8a9bb5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.focusmask-floating-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.focusmask-floating-btn.active {
+  background: rgba(74, 122, 181, 0.3);
+  color: #82b8f9;
+  box-shadow: 0 0 10px rgba(74, 122, 181, 0.2);
+}
+
+.focusmask-floating-btn.inactive {
+  color: #ff5555;
+  background: rgba(255, 50, 50, 0.1);
+}
+
+.focusmask-floating-btn.inactive:hover {
+  background: rgba(255, 50, 50, 0.2);
+  color: #ff7777;
+}
+
+.focusmask-floating-btn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.focusmask-floating-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.focusmask-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 5px;
+}
+
+.focusmask-floating-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 3px;
+}
+
+.focusmask-floating-control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  gap: 4px;
+}
+
+.focusmask-floating-label {
+  font-size: 7.5px;
+  font-weight: 600;
+  color: #6b8ab5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+/* Drag Handle */
+.focusmask-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 36px;
+  cursor: grab;
+  color: rgba(130, 184, 249, 0.5);
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+.focusmask-drag-handle:hover {
+  color: rgba(130, 184, 249, 0.9);
+}
+
+.focusmask-drag-handle:active {
+  cursor: grabbing;
+  color: #82b8f9;
+}
+
+.focusmask-drag-handle-icon {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.focusmask-floating-slider {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.focusmask-floating-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4a7ab5;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  margin-top: -4px; /* Align thumb */
+}
+
+.focusmask-floating-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.focusmask-close-btn:hover {
+  background: rgba(255, 50, 50, 0.2);
+  color: #ff5555;
+}
+
+/* ============================================
+   TOOLTIPS
+   ============================================ */
+
+[data-tooltip] {
+  position: relative;
+  overflow: visible !important;
+}
+
+[data-tooltip]:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(13, 18, 30, 0.98);
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.2s ease;
+  border: 1px solid rgba(130, 184, 249, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 100000000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-tooltip]:hover:after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Ensure floating toolbar buttons can show tooltips */
+.focusmask-floating-btn[data-tooltip] {
+  overflow: visible !important;
+}
+
+.focusmask-floating-btn[data-tooltip]:after {
+  bottom: calc(100% + 10px);
+}
+
+/* Ensure the floating row doesn't clip tooltips */
+.focusmask-floating-row {
+  overflow: visible !important;
+}
+
+.focusmask-floating-expanded {
+  overflow: visible !important;
+}
+
+/* Tooltip for disabled buttons - amber/warning color */
+.focusmask-floating-btn.disabled[data-tooltip]:after {
+  background: rgba(30, 20, 10, 0.98);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+/* Tooltip for sliders */
+.focusmask-floating-slider[data-tooltip]:after {
+  bottom: calc(100% + 12px);
+}
+
+/* Tooltip for logo container */
+.focusmask-floating-logo-container[data-tooltip]:after {
+  bottom: calc(100% + 10px);
+}
+
+/* ============================================
+   UPDATED EXPANDED TOOLBAR STYLES
+   ============================================ */
+
+.focusmask-floating-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.focusmask-floating-logo-container:active {
+  cursor: grabbing;
+}
+
+.focusmask-expanded-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.focusmask-floating-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #82b8f9;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.8px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  display: block;
+  opacity: 1;
+}
+
+/* Ensure sliders have enough space */
+.focusmask-floating-control-group {
+  width: 80px; /* Slightly wider */
+}
+
+/* ============================================
+   FINAL VISUAL REFINEMENTS
+   ============================================ */
+
+/* Squircle Shape */
+.focusmask-floating-expanded {
+  border-radius: 14px !important;
+}
+
+
+/* Icons: More White & Brighter */
+.focusmask-floating-btn {
+  color: #e2e8f0; /* Much whiter (Slate-200) */
+}
+
+/* Drag Indicator: Match Icons */
+.focusmask-drag-indicator {
+  color: #e2e8f0; /* Match icons */
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+/* Labels: Consistent Typography */
+/* Note: Main label styles defined above at line ~936 */
+
+/* Slider Track Lighter */
+.focusmask-floating-slider {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Tooltips refinement */
+[data-tooltip]:after {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 10px;
+  bottom: 130%;
+}
+
+/* ============================================
+   FINAL POLISH: SQUARE ICONS & SMOOTH EXPANSION
+   ============================================ */
+
+/* Smoother Expansion Animation - No Bounce */
+@keyframes expandToolbar {
+  from {
+    opacity: 0;
+    transform: scale(0.9); /* Start closer to final size */
+    width: 60px; /* Start from collapsed size */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    width: auto; /* Animate to auto width */
+  }
+}
+
+.focusmask-floating-expanded {
+  animation: expandToolbar 0.25s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother bezier */
+  transform-origin: left center; /* Avoid centering jump */
+  will-change: width, transform, opacity;
+}
+
+/* Ensure Logo uses higher quality image if available, handled via JS src but ensuring containment */
+.focusmask-expanded-logo,
+.focusmask-collapsed-icon {
+  image-rendering: -webkit-optimize-contrast; /* Sharpen if simple upscale */
+}
+
+/* ============================================
+   CLOSING ANIMATION
+   ============================================ */
+
+@keyframes collapseToolbar {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    width: auto;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+    width: 60px;
+  }
+}
+
+.focusmask-toolbar-container.closing .focusmask-floating-expanded {
+  animation: collapseToolbar 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  pointer-events: none !important; /* Prevent clicks during close */
+}
+
+/* ============================================
+   FIX REMAINING JANK & SIZES
+   ============================================ */
+
+/* Reduced Size for Collapsed Button */
+.focusmask-floating-collapsed {
+  width: 44px !important;
+  height: 44px !important;
+  animation: fadeInIcon 0.4s ease-out forwards !important; /* Smooth entry after close */
+  opacity: 0; /* Start invisible for animation */
+}
+
+@keyframes fadeInIcon {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Reduced Icon Size inside Collapsed Button */
+.focusmask-collapsed-icon {
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 4px; /* Slight round on the image itself */
+}
+
+/* Ensure expanded toolbar keeps squircle */
+.focusmask-floating-expanded {
+  border-radius: 12px !important;
+}
+
+/* ============================================
+   FIX ICON LOADING
+   ============================================ */
+
+/* Ensure the image container fits perfectly */
+.focusmask-collapsed-icon {
+  width: 30px !important;
+  height: 30px !important;
+  object-fit: contain; /* Ensures aspect ratio is kept */
+  display: block; /* Removes inline spacing issues */
+}
+
+/* Force override to ensure visibility */
+.focusmask-floating-collapsed {
+  overflow: hidden; /* Clip any potential overflow */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ============================================
+   REVERSE CLOSING ANIMATION (SHRINK TO RIGHT)
+   ============================================ */
+
+/* Update closing/opening transform origin */
+.focusmask-floating-expanded {
+  /* Default origin is left (for expansion) */
+  transform-origin: left center;
+}
+
+.focusmask-toolbar-container.closing .focusmask-floating-expanded {
+  /* Anchor matches the container's fixed left edge, where the collapsed
+     icon reappears - keeps collapse/expand feeling like one continuous
+     scale instead of jumping sides */
+  transform-origin: left center !important;
+}
+
+/* ============================================
+   TIMING ADJUSTMENTS (SLOWER BAR, FASTER ICON)
+   ============================================ */
+
+/* Slower expansion/contraction */
+.focusmask-floating-expanded {
+  animation-duration: 0.35s !important;
+}
+
+.focusmask-toolbar-container.closing .focusmask-floating-expanded {
+  animation-duration: 0.35s !important;
+}
+
+/* Faster Icon Re-appearance */
+.focusmask-floating-collapsed {
+  animation: fadeInIcon 0.15s ease-out forwards !important; /* Fast, snappy entry */
+}
+
+/* Ensure no gap in visibility */
+@keyframes fadeInIcon {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   FIX ICON JANK & FLICKER
+   ============================================ */
+
+/* 1. Hide the Expanded Logo immediately when closing starts */
+/* This prevents the "double logo" effect where you see the expanded one moving/fading AND the new one appealing */
+.focusmask-toolbar-container.closing .focusmask-expanded-logo {
+  opacity: 0 !important;
+  transition: opacity 0.05s ease !important;
+}
+
+/* 2. Make Collapsed Icon appear INSTANTLY */
+/* Remove the fade-in animation so it feels "fixed" in place immediately after the toolbar vanishes.
+   Excludes toolbar-anchor-right: that variant gives the icon a real
+   animated hand-off further down, and a static "opacity: 1 !important"
+   here would silently win over that animation's opacity keyframe (an
+   animation can never override an !important static declaration for the
+   same property, no matter how specific the animation's own selector is) -
+   pinning it fully visible for the whole 180ms regardless of what the
+   keyframe says, so the fade never actually played. */
+.focusmask-toolbar-container:not(.toolbar-anchor-right) .focusmask-floating-collapsed {
+  animation: none !important;
+  opacity: 1 !important;
+  /* transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);  Keep hover transition only */
+}
+
+/* Ensure the logo image itself is always visible and contained */
+.focusmask-collapsed-icon,
+.focusmask-expanded-logo {
+  object-fit: contain;
+}
+
+/* ============================================
+   CLEAN SCALE & FADE (NO SQUASH, NO GHOSTS)
+   ============================================ */
+
+/* Reset any previous complex animations */
+.focusmask-toolbar-container.closing .focusmask-floating-expanded {
+  animation: cleanExit 0.2s ease-in forwards !important;
+  transform-origin: left center !important; /* Matches container's fixed left anchor */
+  overflow: hidden;
+}
+
+/* Internal elements should just disappear with the container, no separate
+   fade - but excluding .disabled buttons, since forcing opacity:1 here
+   (higher specificity than ".focusmask-floating-btn.disabled { opacity:
+   0.3 }") was un-dimming disabled buttons the instant closing started,
+   making a disabled button like "select area" flash at full brightness
+   as if it were enabled. */
+.focusmask-toolbar-container.closing .focusmask-floating-controls,
+.focusmask-toolbar-container.closing .focusmask-floating-btn:not(.disabled) {
+  opacity: 1 !important; /* Keep solid until the container fades */
+  transition: none !important;
+}
+
+.focusmask-toolbar-container.closing .focusmask-floating-btn.disabled {
+  transition: none !important;
+}
+
+/* Freeze every button/slider inside the bar the instant it starts closing -
+   no hover/active highlight can flash on any of them while the shrink is
+   sliding their visual position around under a stationary cursor */
+.focusmask-toolbar-container.closing .focusmask-floating-expanded,
+.focusmask-toolbar-container.closing .focusmask-floating-expanded * {
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+/* The Exit Animation: Simple Shrink & Fade */
+@keyframes cleanExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(
+      0.5
+    ); /* Shrink significantly to suggest shrinking into the button */
+  }
+}
+
+/* ============================================
+   FIX CORNER CLIPPING ARTIFACTS
+   ============================================ */
+
+.focusmask-floating-collapsed {
+  /* Force GPU layer to ensure border-radius clipping works perfectly on all browsers */
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(
+    white,
+    black
+  ); /* Webkit clipping fix */
+  mask-image: radial-gradient(
+    white,
+    black
+  );
+  overflow: hidden !important;
+  background-clip: padding-box; /* clean borders */
+}
+
+.focusmask-floating-expanded {
+  /* Same for expanded toolbar */
+  transform: translateZ(0);
+  overflow: visible !important; /* Changed to visible to allow tooltips */
+  background-clip: padding-box;
+  /* Removed webkit mask to allow tooltip overflow */
+}
+
+/* Ensure Logo doesn't emit white corners if it has a background */
+.focusmask-collapsed-icon {
+  /* If the logo image itself has white corners, round them further */
+  border-radius: 8px !important;
+}
+
+/* ============================================
+   COLLAPSE STYLE VARIANTS
+   Picked in Toolbar.jsx via COLLAPSE_STYLE. Only the block matching the
+   active toolbar-anchor-* class takes effect; the others sit dormant.
+   ============================================ */
+
+/* RIGHT: bar is right-edge anchored (Toolbar.jsx positions it so it lands
+   under the close button), and uses a plain opacity fade with no scale at
+   all - deliberately, not just left over from the "left" style. A scaling
+   shrink combined with the base `overflow: hidden` clips the box's visible
+   region as it narrows; since the origin sits on the right, the LEFT-side
+   buttons (drag handle, draw, clear, block) get clipped out of view well
+   before the fade finishes, while the right-side content (sliders, power,
+   close) is still opaque - so mid-animation you'd see only half the bar,
+   with no visible background (a dark, nearly-transparent pill blends into
+   a dark page long before brighter icons/text do, at the same opacity).
+   A uniform fade has nothing to clip, so nothing disappears asymmetrically. */
+.focusmask-toolbar-container.toolbar-anchor-right .focusmask-floating-expanded {
+  animation: fadeExpandToolbar 220ms ease-out !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-right.closing
+  .focusmask-floating-expanded {
+  animation: fadeCollapseToolbar 200ms ease-in forwards !important;
+  transform: none !important;
+}
+
+/* Give the collapsed icon a real hand-off instead of the instant,
+   un-transitioned pop-in the base rule further down forces (that rule was
+   written for a different layout). A small settle-in matches the bar's
+   own fade rather than implying a shrink that no longer happens. */
+.focusmask-toolbar-container.toolbar-anchor-right .focusmask-floating-collapsed {
+  animation: rightIconHandoff 180ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+@keyframes rightIconHandoff {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* FADE: no scale or slide - the bar cross-fades into the icon in place,
+   so nothing appears to jump to either side */
+.focusmask-toolbar-container.toolbar-anchor-fade .focusmask-floating-expanded {
+  animation: fadeExpandToolbar 0.2s ease-out !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-fade.closing
+  .focusmask-floating-expanded {
+  animation: fadeCollapseToolbar 0.18s ease-in forwards !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-fade .focusmask-floating-collapsed {
+  animation: fadeInIcon 0.15s ease-out forwards !important;
+}
+
+@keyframes fadeExpandToolbar {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCollapseToolbar {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
