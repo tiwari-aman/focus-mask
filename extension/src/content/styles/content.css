@@ -1279,8 +1279,15 @@
 }
 
 /* 2. Make Collapsed Icon appear INSTANTLY */
-/* Remove the fade-in animation so it feels "fixed" in place immediately after the toolbar vanishes */
-.focusmask-floating-collapsed {
+/* Remove the fade-in animation so it feels "fixed" in place immediately after the toolbar vanishes.
+   Excludes toolbar-anchor-right: that variant gives the icon a real
+   animated hand-off further down, and a static "opacity: 1 !important"
+   here would silently win over that animation's opacity keyframe (an
+   animation can never override an !important static declaration for the
+   same property, no matter how specific the animation's own selector is) -
+   pinning it fully visible for the whole 180ms regardless of what the
+   keyframe says, so the fade never actually played. */
+.focusmask-toolbar-container:not(.toolbar-anchor-right) .focusmask-floating-collapsed {
   animation: none !important;
   opacity: 1 !important;
   /* transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);  Keep hover transition only */
@@ -1303,10 +1310,28 @@
   overflow: hidden;
 }
 
-/* Internal elements should just disappear with the container, no separate fade */
+/* Internal elements should just disappear with the container, no separate
+   fade - but excluding .disabled buttons, since forcing opacity:1 here
+   (higher specificity than ".focusmask-floating-btn.disabled { opacity:
+   0.3 }") was un-dimming disabled buttons the instant closing started,
+   making a disabled button like "select area" flash at full brightness
+   as if it were enabled. */
 .focusmask-toolbar-container.closing .focusmask-floating-controls,
-.focusmask-toolbar-container.closing .focusmask-floating-btn {
+.focusmask-toolbar-container.closing .focusmask-floating-btn:not(.disabled) {
   opacity: 1 !important; /* Keep solid until the container fades */
+  transition: none !important;
+}
+
+.focusmask-toolbar-container.closing .focusmask-floating-btn.disabled {
+  transition: none !important;
+}
+
+/* Freeze every button/slider inside the bar the instant it starts closing -
+   no hover/active highlight can flash on any of them while the shrink is
+   sliding their visual position around under a stationary cursor */
+.focusmask-toolbar-container.closing .focusmask-floating-expanded,
+.focusmask-toolbar-container.closing .focusmask-floating-expanded * {
+  pointer-events: none !important;
   transition: none !important;
 }
 
@@ -1355,4 +1380,86 @@
 .focusmask-collapsed-icon {
   /* If the logo image itself has white corners, round them further */
   border-radius: 8px !important;
+}
+
+/* ============================================
+   COLLAPSE STYLE VARIANTS
+   Picked in Toolbar.jsx via COLLAPSE_STYLE. Only the block matching the
+   active toolbar-anchor-* class takes effect; the others sit dormant.
+   ============================================ */
+
+/* RIGHT: bar is right-edge anchored (Toolbar.jsx positions it so it lands
+   under the close button), and uses a plain opacity fade with no scale at
+   all - deliberately, not just left over from the "left" style. A scaling
+   shrink combined with the base `overflow: hidden` clips the box's visible
+   region as it narrows; since the origin sits on the right, the LEFT-side
+   buttons (drag handle, draw, clear, block) get clipped out of view well
+   before the fade finishes, while the right-side content (sliders, power,
+   close) is still opaque - so mid-animation you'd see only half the bar,
+   with no visible background (a dark, nearly-transparent pill blends into
+   a dark page long before brighter icons/text do, at the same opacity).
+   A uniform fade has nothing to clip, so nothing disappears asymmetrically. */
+.focusmask-toolbar-container.toolbar-anchor-right .focusmask-floating-expanded {
+  animation: fadeExpandToolbar 220ms ease-out !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-right.closing
+  .focusmask-floating-expanded {
+  animation: fadeCollapseToolbar 200ms ease-in forwards !important;
+  transform: none !important;
+}
+
+/* Give the collapsed icon a real hand-off instead of the instant,
+   un-transitioned pop-in the base rule further down forces (that rule was
+   written for a different layout). A small settle-in matches the bar's
+   own fade rather than implying a shrink that no longer happens. */
+.focusmask-toolbar-container.toolbar-anchor-right .focusmask-floating-collapsed {
+  animation: rightIconHandoff 180ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+@keyframes rightIconHandoff {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* FADE: no scale or slide - the bar cross-fades into the icon in place,
+   so nothing appears to jump to either side */
+.focusmask-toolbar-container.toolbar-anchor-fade .focusmask-floating-expanded {
+  animation: fadeExpandToolbar 0.2s ease-out !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-fade.closing
+  .focusmask-floating-expanded {
+  animation: fadeCollapseToolbar 0.18s ease-in forwards !important;
+  transform: none !important;
+}
+
+.focusmask-toolbar-container.toolbar-anchor-fade .focusmask-floating-collapsed {
+  animation: fadeInIcon 0.15s ease-out forwards !important;
+}
+
+@keyframes fadeExpandToolbar {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCollapseToolbar {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
