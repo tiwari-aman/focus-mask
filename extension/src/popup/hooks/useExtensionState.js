@@ -21,7 +21,6 @@ const DEFAULT_STATE = {
   areas: [],
 };
 
-// URLs where extensions cannot inject content scripts
 const RESTRICTED_URL_PATTERNS = [
   /^chrome:\/\//,
   /^chrome-extension:\/\//,
@@ -31,6 +30,7 @@ const RESTRICTED_URL_PATTERNS = [
   /^https:\/\/chrome\.google\.com\/webstore/,
   /^https:\/\/chromewebstore\.google\.com/,
   /^https:\/\/microsoftedge\.microsoft\.com\/addons/,
+  /^https:\/\/addons\.mozilla\.org/,
 ];
 
 /**
@@ -62,9 +62,23 @@ function useExtensionState() {
 
           // Check for local file URLs without file scheme access
           if (tab.url && tab.url.startsWith("file://")) {
-            if (chrome.extension?.isAllowedFileSchemeAccess) {
+            const extApi =
+              typeof browser !== "undefined" && browser?.extension
+                ? browser.extension
+                : chrome?.extension;
+
+            if (extApi?.isAllowedFileSchemeAccess) {
               const isAllowed = await new Promise((resolve) => {
-                chrome.extension.isAllowedFileSchemeAccess(resolve);
+                try {
+                  const res = extApi.isAllowedFileSchemeAccess((val) => {
+                    resolve(Boolean(val));
+                  });
+                  if (res && typeof res.then === "function") {
+                    res.then(resolve).catch(() => resolve(false));
+                  }
+                } catch {
+                  resolve(false);
+                }
               });
               if (!isAllowed) {
                 setIsFileWithoutAccess(true);

@@ -151,10 +151,13 @@ async function injectContentScript(tabId) {
     const tab = await browser.tabs.get(tabId);
 
     if (
+      !tab?.url ||
       tab.url.startsWith("chrome://") ||
       tab.url.startsWith("edge://") ||
       tab.url.startsWith("about:") ||
-      tab.url.startsWith("chrome-extension://")
+      tab.url.startsWith("chrome-extension://") ||
+      tab.url.startsWith("moz-extension://") ||
+      tab.url.includes("addons.mozilla.org")
     ) {
       return;
     }

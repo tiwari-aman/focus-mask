@@ -170,6 +170,45 @@ function FloatingToolbarExpanded({
 
         {/* Sliders Area with Labels */}
         <div className="focusmask-floating-controls">
+          <style>{`
+            .focusmask-floating-slider {
+              height: 16px !important;
+              background: transparent !important;
+              accent-color: #4a7ab5 !important;
+            }
+            .focusmask-floating-slider::-webkit-slider-runnable-track {
+              height: 4px !important;
+              border-radius: 2px !important;
+              background: rgba(255, 255, 255, 0.25) !important;
+            }
+            .focusmask-floating-slider::-webkit-slider-thumb {
+              -webkit-appearance: none !important;
+              appearance: none !important;
+              width: 12px !important;
+              height: 12px !important;
+              border-radius: 50% !important;
+              background: #4a7ab5 !important;
+              cursor: pointer !important;
+              box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;
+              margin-top: -4px !important;
+            }
+            .focusmask-floating-slider::-moz-range-track {
+              height: 4px !important;
+              border: none !important;
+              border-radius: 2px !important;
+              background: rgba(255, 255, 255, 0.25) !important;
+            }
+            .focusmask-floating-slider::-moz-range-thumb {
+              width: 12px !important;
+              height: 12px !important;
+              border: none !important;
+              border-radius: 50% !important;
+              background-color: #4a7ab5 !important;
+              background: #4a7ab5 !important;
+              cursor: pointer !important;
+              box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;
+            }
+          `}</style>
           <div className="focusmask-floating-control-group">
             <div className="focusmask-floating-label">BLUR</div>
             <input
@@ -184,7 +223,7 @@ function FloatingToolbarExpanded({
               }
               onMouseDown={stopPropagation}
               disabled={!maskActive}
-              style={{ opacity: maskActive ? 1 : 0.5 }}
+              style={{ opacity: maskActive ? 1 : 0.5, accentColor: "#4a7ab5" }}
               data-tooltip={maskActive ? `Blur: ${blurPercent}%` : "Enable mask to adjust"}
             />
           </div>
@@ -203,7 +242,7 @@ function FloatingToolbarExpanded({
               }
               onMouseDown={stopPropagation}
               disabled={!maskActive}
-              style={{ opacity: maskActive ? 1 : 0.5 }}
+              style={{ opacity: maskActive ? 1 : 0.5, accentColor: "#4a7ab5" }}
               data-tooltip={maskActive ? `Darkness: ${darknessPercent}%` : "Enable mask to adjust"}
             />
           </div>

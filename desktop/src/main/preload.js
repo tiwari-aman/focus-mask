@@ -11,9 +11,19 @@ contextBridge.exposeInMainWorld('focusMaskDesktop', {
     return ipcRenderer.invoke('get-state');
   },
   onMenuAction: (callback) => {
-    const handler = (event, action, data) => callback(action, data);
+    // Action, data, extra
+    const handler = (event, action, data, extra) => callback(action, data, extra);
     ipcRenderer.on('menu-action', handler);
     return () => ipcRenderer.removeListener('menu-action', handler);
+  },
+  lockToActiveWindow: () => {
+    return ipcRenderer.invoke('lock-to-active-window');
+  },
+  getCurrentApp: () => {
+    return ipcRenderer.invoke('get-current-app');
+  },
+  unlockWindowTracking: () => {
+    ipcRenderer.send('unlock-window-tracking');
   },
   quitApp: () => {
     ipcRenderer.send('quit-app');

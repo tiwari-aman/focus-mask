@@ -3,8 +3,11 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Icon } from "@iconify/react";
+import { useExtensionUrl } from "@/lib/useExtensionUrl";
+import { CHROME_STORE_URL, FIREFOX_STORE_URL } from "@/lib/constants";
 
 export default function GetExtension() {
+  const extensionUrl = useExtensionUrl();
   const containerRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -16,9 +19,10 @@ export default function GetExtension() {
   const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [24, 0, 0, -24]);
 
   const browsers = [
-    { name: "Chrome", icon: "devicon:chrome" },
-    { name: "Brave", icon: "logos:brave" },
-    { name: "Edge", icon: "logos:microsoft-edge" },
+    { name: "Chrome", icon: "devicon:chrome", url: CHROME_STORE_URL },
+    { name: "Firefox", icon: "logos:firefox", url: FIREFOX_STORE_URL },
+    { name: "Brave", icon: "logos:brave", url: CHROME_STORE_URL },
+    { name: "Edge", icon: "logos:microsoft-edge", url: CHROME_STORE_URL },
   ];
 
   return (
@@ -86,13 +90,16 @@ export default function GetExtension() {
             {/* Browser Support UI */}
             <div className="relative z-10 flex flex-wrap justify-center items-center gap-4 sm:gap-8 mb-10 sm:mb-14">
               {browsers.map((browser, index) => (
-                <motion.div
+                <motion.a
                   key={browser.name}
+                  href={browser.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.1 * index }}
-                  className="flex flex-col items-center gap-2 group"
+                  className="flex flex-col items-center gap-2 group cursor-pointer"
                 >
                   <div className="relative p-2.5 sm:p-3 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.08] group-hover:border-blue-500/30 group-hover:scale-110 transition-all duration-500 overflow-hidden shadow-sm hover:shadow-blue-500/10">
                     <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -104,7 +111,7 @@ export default function GetExtension() {
                   <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.15em] uppercase text-text-muted group-hover:text-white transition-colors">
                     {browser.name}
                   </span>
-                </motion.div>
+                </motion.a>
               ))}
             </div>
 
@@ -112,7 +119,7 @@ export default function GetExtension() {
               <motion.a
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                href="https://chromewebstore.google.com/detail/focus-mask/gebdfpdpijonpofhhoogpifeoklmmgoc"
+                href={extensionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-animated w-full sm:w-auto"

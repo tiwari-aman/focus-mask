@@ -106,15 +106,51 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
     return previewArea ? [...areas, previewArea] : areas;
   }, [areas, previewArea]);
 
-  const maskId = useMemo(
-    () => `focusmask-blur-mask-${Math.random().toString(36).substr(2, 9)}`,
-    [],
-  );
-
   const cornerRadius = 6;
+  const area = allAreas[0];
+
+  // If no area drawn yet, cover full screen with dark overlay
+  if (!area || area.width === 0 || area.height === 0) {
+    return (
+      <div
+        className="focusmask-blur-section"
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: `rgba(0, 0, 0, ${darkness})`,
+          backdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+          WebkitBackdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
+    );
+  }
+
+  const topH = Math.max(0, Math.round(area.y));
+  const botTop = Math.max(0, Math.round(area.y + area.height));
+  const leftW = Math.max(0, Math.round(area.x));
+  const rightL = Math.max(0, Math.round(area.x + area.width));
+  const midH = Math.max(0, Math.round(area.height));
+
+  const sectionStyle = {
+    position: "fixed",
+    backgroundColor: `rgba(0, 0, 0, ${darkness})`,
+    backdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+    WebkitBackdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+    pointerEvents: "none",
+    zIndex: 1,
+  };
 
   return (
     <>
+      {/* 4 surrounding HTML sections - works on every browser & Electron */}
+      <div style={{ ...sectionStyle, top: 0, left: 0, width: "100%", height: topH }} />
+      <div style={{ ...sectionStyle, top: botTop, left: 0, width: "100%", bottom: 0 }} />
+      <div style={{ ...sectionStyle, top: topH, left: 0, width: leftW, height: midH }} />
+      <div style={{ ...sectionStyle, top: topH, left: rightL, right: 0, height: midH }} />
+
+      {/* SVG corner mask overlay for rounded corners (rx=6) */}
       <svg
         style={{
           position: "fixed",
@@ -123,38 +159,32 @@ function BlurOverlay({ areas, previewArea, blur, darkness }) {
           width: "100%",
           height: "100%",
           pointerEvents: "none",
-          zIndex: 0,
+          zIndex: 1,
         }}
       >
         <defs>
-          <mask id={maskId}>
+          <mask id="focusmask-rounded-cutout">
             <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {allAreas.map((area, index) => (
-              <rect
-                key={index}
-                x={area.x}
-                y={area.y}
-                width={area.width}
-                height={area.height}
-                rx={cornerRadius}
-                ry={cornerRadius}
-                fill="black"
-              />
-            ))}
+            <rect
+              x={area.x}
+              y={area.y}
+              width={area.width}
+              height={area.height}
+              rx={cornerRadius}
+              ry={cornerRadius}
+              fill="black"
+            />
           </mask>
         </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill={`rgba(0, 0, 0, ${darkness})`}
+          mask="url(#focusmask-rounded-cutout)"
+        />
       </svg>
-
-      <div
-        className="focusmask-blur-section"
-        style={{
-          backgroundColor: `rgba(0, 0, 0, ${darkness})`,
-          backdropFilter: `blur(${blur}px)`,
-          WebkitBackdropFilter: `blur(${blur}px)`,
-          mask: allAreas.length > 0 ? `url(#${maskId})` : "none",
-          WebkitMask: allAreas.length > 0 ? `url(#${maskId})` : "none",
-        }}
-      />
     </>
   );
 }

@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import TrueFocus from "@/app/components/TrueFocus";
+import { useExtensionUrl } from "@/lib/useExtensionUrl";
 
 export default function Hero() {
+  const extensionUrl = useExtensionUrl();
+
   return (
     <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-6">
@@ -46,7 +49,7 @@ export default function Hero() {
               <motion.a
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                href="https://chromewebstore.google.com/detail/focus-mask/gebdfpdpijonpofhhoogpifeoklmmgoc"
+                href={extensionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-animated inline-flex"
@@ -59,12 +62,12 @@ export default function Hero() {
                 </div>
               </motion.a>
 
-              {/* Subtle Browser Logos */}
+              {/* Browser Logos */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="flex items-center gap-5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                className="flex items-center gap-5"
               >
                 <span className="text-[10px] sm:text-xs font-medium tracking-widest uppercase text-text-muted">
                   Works on:
@@ -72,6 +75,10 @@ export default function Hero() {
                 <div className="flex items-center gap-3">
                   <Icon
                     icon="devicon:chrome"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
+                  <Icon
+                    icon="logos:firefox"
                     className="w-4 h-4 sm:w-5 sm:h-5"
                   />
                   <Icon icon="logos:brave" className="w-4 h-4 sm:w-5 sm:h-5" />

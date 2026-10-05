@@ -923,16 +923,24 @@
 
 .focusmask-floating-slider {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 16px;
+  background: transparent;
+  border: none;
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+  accent-color: #4a7ab5;
+}
+
+.focusmask-floating-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .focusmask-floating-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -942,10 +950,22 @@
   margin-top: -4px; /* Align thumb */
 }
 
-.focusmask-floating-slider::-webkit-slider-runnable-track {
+.focusmask-floating-slider::-moz-range-track {
   height: 4px;
+  border: none;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.focusmask-floating-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background-color: #4a7ab5;
+  background: #4a7ab5;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
 .focusmask-close-btn:hover {
@@ -1097,10 +1117,6 @@
 /* Labels: Consistent Typography */
 /* Note: Main label styles defined above at line ~936 */
 
-/* Slider Track Lighter */
-.focusmask-floating-slider {
-  background: rgba(255, 255, 255, 0.25);
-}
 
 /* Tooltips refinement */
 [data-tooltip]:after {

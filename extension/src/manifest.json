@@ -27,8 +27,17 @@
     "64": "assets/icon64.png",
     "128": "assets/icon128.png"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "focusmask@amantiwari.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "content_scripts": [],
   "web_accessible_resources": [

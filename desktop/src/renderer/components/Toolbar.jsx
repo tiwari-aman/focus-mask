@@ -23,6 +23,9 @@ function Toolbar({
   hasReachedLimit = false,
   maskActive = true,
   zoomRatio = 1,
+  windowMode,
+  targetWindow,
+  targetWindowFocused,
   onToggle,
   onToggleMaskActive,
   onToggleDrawMode,
@@ -31,6 +34,8 @@ function Toolbar({
   onDarknessChange,
   onBlockChange,
   onHoverToolbar,
+  onLockToWindow,
+  onUnlockWindow,
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [position, setPosition] = useState(() => {
@@ -38,7 +43,7 @@ function Toolbar({
     const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
     return {
       x: Math.max(20, vw - EXPANDED_WIDTH - 40),
-      y: 80,
+      y: 200,
       vw,
       vh,
     };
@@ -247,6 +252,9 @@ function Toolbar({
           blockInteraction={blockInteraction}
           hasReachedLimit={hasReachedLimit}
           maskActive={maskActive}
+          windowMode={windowMode}
+          targetWindow={targetWindow}
+          targetWindowFocused={targetWindowFocused}
           onToggleMaskActive={onToggleMaskActive}
           onToggleDrawMode={onToggleDrawMode}
           onClear={onClear}
@@ -255,6 +263,8 @@ function Toolbar({
           onBlockChange={onBlockChange}
           onCollapse={handleCollapse}
           onMouseDown={handleMouseDown}
+          onLockToWindow={onLockToWindow}
+          onUnlockWindow={onUnlockWindow}
         />
       )}
     </div>

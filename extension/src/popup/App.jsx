@@ -25,9 +25,16 @@ function App() {
   );
 
   const handleOpenSettings = () => {
+    const isFirefox =
+      typeof navigator !== "undefined" &&
+      navigator.userAgent.toLowerCase().includes("firefox");
+    const targetUrl = isFirefox
+      ? "about:addons"
+      : `chrome://extensions/?id=${chrome.runtime?.id || ""}`;
+
     if (chrome.tabs?.create) {
       chrome.tabs.create({
-        url: `chrome://extensions/?id=${chrome.runtime.id}`,
+        url: targetUrl,
       });
     }
   };

@@ -76,6 +76,7 @@ website/
 ## Links
 
 - 🧩 **Chrome Web Store**: [Get the Extension](https://chromewebstore.google.com/detail/focus-mask/gebdfpdpijonpofhhoogpifeoklmmgoc)
+- 🦊 **Firefox Add-ons**: [Get for Firefox](https://addons.mozilla.org/en-GB/firefox/addon/focus-mask/)
 - 📄 **Privacy Policy**: [/privacy-policy](https://focus-mask.vercel.app/privacy-policy)
 
 ## License

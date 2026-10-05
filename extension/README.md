@@ -28,10 +28,18 @@ A Chrome extension that enhances focus and concentration by allowing users to bl
    npm install
    npm run build
    ```
-3. Navigate to `chrome://extensions/` in Google Chrome
-4. Enable **Developer mode** (toggle in the top-right corner)
-5. Click **Load unpacked** and select the **`extension/dist`** directory
-6. The Focus Mask icon will appear in your Chrome extension toolbar
+### Loading in Google Chrome / Brave / Edge
+1. Navigate to `chrome://extensions/`
+2. Enable **Developer mode** (toggle in the top-right corner)
+3. Click **Load unpacked** and select the **`extension/dist`** directory
+4. The Focus Mask icon will appear in your extension toolbar
+
+### Loading in Mozilla Firefox
+1. Navigate to `about:debugging#/runtime/this-firefox` in Mozilla Firefox
+2. Click **Load Temporary Add-on...**
+3. Select `manifest.json` inside the **`extension/dist`** directory (or select any file inside `dist/`)
+4. The Focus Mask icon will appear in your Firefox toolbar (or extensions menu)
+   *(Note: Ensure host permissions are enabled for sites where you want Focus Mask to operate)*
 
 ---
 

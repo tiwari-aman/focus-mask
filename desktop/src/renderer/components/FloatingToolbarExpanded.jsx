@@ -8,6 +8,9 @@ function FloatingToolbarExpanded({
   blockInteraction,
   hasReachedLimit,
   maskActive,
+  windowMode,
+  targetWindow,
+  targetWindowFocused,
   onToggleDrawMode,
   onClear,
   onToggleMaskActive,
@@ -16,7 +19,10 @@ function FloatingToolbarExpanded({
   onBlockChange,
   onCollapse,
   onMouseDown,
+  onLockToWindow,
+  onUnlockWindow,
 }) {
+  const isWindowBound = windowMode === "window-bound";
   const blurPercent = Math.round((blur / 20) * 100);
   const darknessPercent = Math.round(darkness * 100);
 
@@ -150,6 +156,70 @@ function FloatingToolbarExpanded({
             />
           </svg>
         </button>
+
+        <div className="focusmask-divider"></div>
+
+        {/* Window Lock Button */}
+        <button
+          className={`focusmask-floating-btn ${isWindowBound ? "active" : ""}`}
+          onClick={isWindowBound ? onUnlockWindow : onLockToWindow}
+          onMouseDown={stopPropagation}
+          data-tooltip={
+            isWindowBound
+              ? `Locked to ${targetWindow?.appName || "app"} — click to unlock`
+              : "Lock mask to active window"
+          }
+          style={{
+            opacity: targetWindowFocused !== false ? 1 : 0.45,
+          }}
+        >
+          {isWindowBound ? (
+            /* Pin icon - locked */
+            <svg viewBox="0 0 24 24" className="focusmask-floating-icon" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="17" x2="12" y2="22" />
+              <path d="M5 17h14v-1.76a2 2 0 00-1.11-1.79l-1.78-.9A2 2 0 0115 10.76V6h1a2 2 0 000-4H8a2 2 0 000 4h1v4.76a2 2 0 01-1.11 1.79l-1.78.9A2 2 0 005 15.24V17z" />
+            </svg>
+          ) : (
+            /* Grid icon - global mode */
+            <svg viewBox="0 0 24 24" className="focusmask-floating-icon" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+            </svg>
+          )}
+        </button>
+
+        {/* Locked app label shown only when pinned */}
+        {isWindowBound && targetWindow?.appName && (
+          <>
+            <div className="focusmask-divider"></div>
+            <div
+              style={{
+                fontSize: "9px",
+                color: "#82b8f9",
+                fontWeight: 600,
+                letterSpacing: "0.3px",
+                maxWidth: 64,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                opacity: targetWindowFocused !== false ? 1 : 0.45,
+                userSelect: "none",
+                cursor: "default",
+              }}
+              data-tooltip={
+                targetWindowFocused
+                  ? `Tracking: ${targetWindow.appName}`
+                  : `${targetWindow.appName} is not focused`
+              }
+            >
+              {targetWindow.appName.length > 8
+                ? targetWindow.appName.slice(0, 7) + "…"
+                : targetWindow.appName}
+            </div>
+          </>
+        )}
 
         <div className="focusmask-divider"></div>
 

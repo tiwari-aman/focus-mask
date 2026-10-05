@@ -1,90 +1,264 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Toolbar from "./components/Toolbar";
 import MaskOverlay from "./components/MaskOverlay";
 import DrawingArea from "./components/DrawingArea";
 
-const DEFAULT_STATE = {
-  enabled: true,
-  maskActive: true,
-  blur: 5,
-  darkness: 0.5,
-  blockInteraction: false,
-  areas: [],
-  drawMode: false,
-};
+function getDefaultProfile(isPinned = false) {
+  return {
+    areas: [],
+    blur: 5,
+    darkness: 0.5,
+    blockInteraction: false,
+    maskActive: true,
+    isPinned,
+  };
+}
 
 const MAX_FOCUS_AREAS = 1;
 
 function App() {
-  const [state, setState] = useState(DEFAULT_STATE);
+  const [enabled, setEnabled] = useState(true);
+  const [mode, setMode] = useState("window-bound"); // "window-bound" | "global"
+  const [profiles, setProfiles] = useState({});
+  const [currentApp, setCurrentApp] = useState(null); // { appName, bounds, pid }
+  const [drawMode, setDrawMode] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentRect, setCurrentRect] = useState(null);
+
   const startPosRef = useRef({ x: 0, y: 0 });
   const isOverControlRef = useRef(false);
+  const currentAppRef = useRef(null);
 
-  // Load initial state from desktop main process
+  // Keep ref in sync to avoid stale closures in event listeners
+  currentAppRef.current = currentApp;
+
+  // ── Load initial state & active window ──────────────────────────────────────
   useEffect(() => {
     if (window.focusMaskDesktop?.getState) {
       window.focusMaskDesktop.getState().then((saved) => {
         if (saved) {
-          setState((prev) => ({ ...prev, ...saved }));
+          if (saved.enabled !== undefined) setEnabled(saved.enabled);
+          if (saved.mode !== undefined) setMode(saved.mode);
+          if (saved.profiles) {
+            setProfiles(saved.profiles);
+          } else if (saved.areas && saved.areas.length > 0) {
+            // Migrate older single-instance state into global profile
+            setProfiles({
+              global: {
+                areas: saved.areas,
+                blur: saved.blur ?? 5,
+                darkness: saved.darkness ?? 0.5,
+                blockInteraction: !!saved.blockInteraction,
+                maskActive: saved.maskActive ?? true,
+                isPinned: false,
+              },
+            });
+          }
         }
+      });
+    }
+
+    if (window.focusMaskDesktop?.getCurrentApp) {
+      window.focusMaskDesktop.getCurrentApp().then((app) => {
+        if (app) setCurrentApp(app);
       });
     }
   }, []);
 
-  // Save state back to desktop main process
+  // ── Save state back to desktop main process ──────────────────────────────────
   const saveState = useCallback((newState) => {
     if (window.focusMaskDesktop?.saveState) {
       window.focusMaskDesktop.saveState(newState);
     }
   }, []);
 
-  const updateState = useCallback(
+  // ── Determine active profile & visibility for current window ────────────────
+  const appName = currentApp?.appName;
+  const hasAppProfile = !!(appName && profiles[appName]?.isPinned);
+
+  let isVisible = false;
+  let activeProfile = null;
+
+  if (enabled) {
+    if (mode === "window-bound") {
+      if (hasAppProfile) {
+        isVisible = true;
+        activeProfile = profiles[appName];
+      } else {
+        // Current window is NOT pinned: hide toolbar and mask completely!
+        isVisible = false;
+        activeProfile = null;
+      }
+    } else {
+      // Global mode: visible across all windows
+      isVisible = true;
+      activeProfile = profiles["global"] || getDefaultProfile(false);
+    }
+  }
+
+  // ── Helper to update the active profile ──────────────────────────────────────
+  const updateActiveProfile = useCallback(
     (updates) => {
-      setState((prev) => {
-        const next = { ...prev, ...updates };
-        saveState(next);
+      const curApp = currentAppRef.current;
+      const targetKey =
+        mode === "window-bound" && curApp?.appName ? curApp.appName : "global";
+
+      setProfiles((prev) => {
+        const existing =
+          prev[targetKey] || getDefaultProfile(mode === "window-bound");
+        const updated = { ...existing, ...updates };
+        const next = { ...prev, [targetKey]: updated };
+        saveState({ profiles: next, mode, enabled: true });
         return next;
       });
     },
-    [saveState],
+    [mode, saveState],
   );
 
-  // Listen to menu bar / tray actions & global hotkey (Cmd+Shift+F)
+  // ── Lock/Pin to current window ──────────────────────────────────────────────
+  const handleLockToWindow = useCallback(() => {
+    const curApp = currentAppRef.current;
+    if (!curApp?.appName) return;
+    const name = curApp.appName;
+    setMode("window-bound");
+
+    setProfiles((prev) => {
+      const existing = prev[name] || activeProfile || getDefaultProfile(true);
+      // Convert any existing screen coordinates into relative window coords
+      const convertedAreas = (existing.areas || []).map((a) => {
+        if (a.relX !== undefined) return a;
+        if (!curApp.bounds) return a;
+        return {
+          ...a,
+          relX: a.x - curApp.bounds.x,
+          relY: a.y - curApp.bounds.y,
+        };
+      });
+
+      const next = {
+        ...prev,
+        [name]: {
+          ...existing,
+          isPinned: true,
+          areas: convertedAreas,
+        },
+      };
+      saveState({ profiles: next, mode: "window-bound", enabled: true });
+      return next;
+    });
+  }, [activeProfile, saveState]);
+
+  // ── Unlock / Unpin ──────────────────────────────────────────────────────────
+  const handleUnlockWindow = useCallback(() => {
+    const curApp = currentAppRef.current;
+    if (!curApp?.appName) return;
+    const name = curApp.appName;
+
+    setProfiles((prev) => {
+      const existing = prev[name];
+      if (!existing) return prev;
+      const next = {
+        ...prev,
+        [name]: { ...existing, isPinned: false },
+      };
+      saveState({ profiles: next, mode: "global", enabled: true });
+      return next;
+    });
+    setMode("global");
+    window.focusMaskDesktop?.unlockWindowTracking?.();
+  }, [saveState]);
+
+  // ── Listen to active window events & menu actions from main process ─────────
   useEffect(() => {
     if (!window.focusMaskDesktop?.onMenuAction) return;
 
-    const cleanup = window.focusMaskDesktop.onMenuAction((action, data) => {
+    const cleanup = window.focusMaskDesktop.onMenuAction((action, data, extra) => {
       switch (action) {
+        case "active-app-changed":
+          // User switched to another application window
+          if (data) setCurrentApp(data);
+          break;
+
+        case "active-window-moved":
+          // The current active window was moved or resized
+          if (data) {
+            setCurrentApp((prev) => (prev ? { ...prev, bounds: data.bounds } : data));
+          }
+          break;
+
+        case "pin-current-app":
+          if (data?.appName) {
+            setMode("window-bound");
+            setEnabled(true);
+            setProfiles((prev) => {
+              const existing = prev[data.appName] || getDefaultProfile(true);
+              const next = {
+                ...prev,
+                [data.appName]: { ...existing, isPinned: true },
+              };
+              saveState({ profiles: next, mode: "window-bound", enabled: true });
+              return next;
+            });
+          }
+          break;
+
+        case "set-mode":
+          if (data === "global") {
+            setMode("global");
+            setEnabled(true);
+            saveState({ mode: "global", enabled: true });
+          }
+          break;
+
         case "toggle":
-          setState((prev) => {
-            const next = { ...prev, enabled: !prev.enabled };
-            saveState(next);
+          setEnabled((prev) => {
+            const next = !prev;
+            saveState({ enabled: next });
             return next;
           });
           break;
+
         case "draw":
-          updateState({ drawMode: true });
+          setDrawMode(true);
           break;
+
         case "clear":
-          updateState({ areas: [], drawMode: false });
+          updateActiveProfile({ areas: [] });
+          setDrawMode(false);
           break;
+
         case "set-block":
-          updateState({ blockInteraction: !!data });
+          updateActiveProfile({ blockInteraction: !!data });
           break;
+
         default:
           break;
       }
     });
 
     return cleanup;
-  }, [updateState, saveState]);
+  }, [updateActiveProfile, saveState]);
 
-  // Check if cursor coordinate is inside the focus area
+  // ── Convert relative coordinates back to screen coordinates for rendering ────
+  const screenAreas = useMemo(() => {
+    if (!activeProfile || !activeProfile.areas) return [];
+    if (mode === "window-bound" && currentApp?.bounds) {
+      return activeProfile.areas.map((a) => {
+        if (a.relX === undefined) return a;
+        return {
+          ...a,
+          x: a.relX + currentApp.bounds.x,
+          y: a.relY + currentApp.bounds.y,
+        };
+      });
+    }
+    return activeProfile.areas;
+  }, [activeProfile, mode, currentApp?.bounds]);
+
+  // ── Check if cursor coordinate is inside a focus area ───────────────────────
   const isInsideArea = useCallback(
     (x, y) => {
-      return state.areas.some(
+      return screenAreas.some(
         (area) =>
           x >= area.x &&
           x <= area.x + area.width &&
@@ -92,39 +266,34 @@ function App() {
           y <= area.y + area.height,
       );
     },
-    [state.areas],
+    [screenAreas],
   );
 
-  // Coordinate click-through with Electron window
+  // ── Coordinate click-through with Electron window ───────────────────────────
   useEffect(() => {
     if (!window.focusMaskDesktop?.setIgnoreMouseEvents) return;
 
-    if (!state.enabled) {
-      // Disabled: completely pass-through all mouse events
+    if (!isVisible || !activeProfile) {
+      // Hidden on this window: completely ignore mouse events and pass through 100%
       window.focusMaskDesktop.setIgnoreMouseEvents(true, { forward: true });
       return;
     }
 
-    if (state.drawMode || isDrawing) {
-      // Drawing mode: capture mouse events to draw
+    if (drawMode || isDrawing) {
+      // Drawing mode: capture clicks
       window.focusMaskDesktop.setIgnoreMouseEvents(false);
       return;
     }
 
     const handleMouseMove = (e) => {
       if (isOverControlRef.current) {
-        // Over toolbar, resize handles, or close button: capture
         window.focusMaskDesktop.setIgnoreMouseEvents(false);
-      } else if (state.areas.length > 0 && isInsideArea(e.clientX, e.clientY)) {
-        // Inside focus area: forward clicks to Notion!
+      } else if (screenAreas.length > 0 && isInsideArea(e.clientX, e.clientY)) {
         window.focusMaskDesktop.setIgnoreMouseEvents(true, { forward: true });
       } else {
-        // Outside focus area
-        if (state.blockInteraction && state.areas.length > 0) {
-          // Block interaction mode: capture clicks to prevent clicks falling to background
+        if (activeProfile.blockInteraction && screenAreas.length > 0) {
           window.focusMaskDesktop.setIgnoreMouseEvents(false);
         } else {
-          // Allow clicks outside
           window.focusMaskDesktop.setIgnoreMouseEvents(true, { forward: true });
         }
       }
@@ -132,92 +301,91 @@ function App() {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [
-    state.enabled,
-    state.drawMode,
-    state.areas,
-    state.blockInteraction,
-    isDrawing,
-    isInsideArea,
-  ]);
+  }, [isVisible, activeProfile, drawMode, isDrawing, screenAreas, isInsideArea]);
 
-  // Esc key cancels drawing or clears area
+  // ── Esc key ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" || e.keyCode === 27) {
         e.preventDefault();
         e.stopPropagation();
-
-        if (state.drawMode) {
+        if (drawMode) {
           setIsDrawing(false);
           setCurrentRect(null);
-          updateState({ drawMode: false });
-        } else if (state.areas.length > 0) {
-          updateState({ areas: [] });
+          setDrawMode(false);
+        } else if (screenAreas.length > 0) {
+          updateActiveProfile({ areas: [] });
         }
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [state.drawMode, state.areas, updateState]);
+  }, [drawMode, screenAreas, updateActiveProfile]);
 
-  // Handle pointer drawing
+  // ── Handle drawing ──────────────────────────────────────────────────────────
   const handleStartDrawing = useCallback(
     (e) => {
-      if (!state.drawMode) return;
-      const x = e.clientX;
-      const y = e.clientY;
-
+      if (!drawMode) return;
       setIsDrawing(true);
-      startPosRef.current = { x, y };
-      setCurrentRect({ x, y, width: 0, height: 0 });
+      startPosRef.current = { x: e.clientX, y: e.clientY };
+      setCurrentRect({ x: e.clientX, y: e.clientY, width: 0, height: 0 });
     },
-    [state.drawMode],
+    [drawMode],
   );
 
   const handleDraw = useCallback(
     (e) => {
       if (!isDrawing) return;
-
-      const currentX = e.clientX;
-      const currentY = e.clientY;
-
-      const x = Math.min(startPosRef.current.x, currentX);
-      const y = Math.min(startPosRef.current.y, currentY);
-      const width = Math.abs(currentX - startPosRef.current.x);
-      const height = Math.abs(currentY - startPosRef.current.y);
-
-      setCurrentRect({ x, y, width, height });
+      const x = Math.min(startPosRef.current.x, e.clientX);
+      const y = Math.min(startPosRef.current.y, e.clientY);
+      setCurrentRect({
+        x,
+        y,
+        width: Math.abs(e.clientX - startPosRef.current.x),
+        height: Math.abs(e.clientY - startPosRef.current.y),
+      });
     },
     [isDrawing],
   );
 
   const handleStopDrawing = useCallback(() => {
     if (!isDrawing || !currentRect) return;
-
     setIsDrawing(false);
 
     if (currentRect.width > 30 && currentRect.height > 30) {
-      updateState({
-        areas: [currentRect],
-        drawMode: false,
-      });
+      let finalArea = { ...currentRect };
+      // In window-bound mode, store relative coordinates to window top-left
+      if (mode === "window-bound" && currentApp?.bounds) {
+        finalArea = {
+          ...finalArea,
+          relX: currentRect.x - currentApp.bounds.x,
+          relY: currentRect.y - currentApp.bounds.y,
+        };
+      }
+      updateActiveProfile({ areas: [finalArea] });
+      setDrawMode(false);
     }
-
     setCurrentRect(null);
-  }, [isDrawing, currentRect, updateState]);
+  }, [isDrawing, currentRect, mode, currentApp?.bounds, updateActiveProfile]);
 
-  // Resize and remove area handlers
+  // ── Area handlers ───────────────────────────────────────────────────────────
   const handleRemoveArea = useCallback(() => {
-    updateState({ areas: [] });
-  }, [updateState]);
+    updateActiveProfile({ areas: [] });
+  }, [updateActiveProfile]);
 
   const handleResizeArea = useCallback(
     (index, newArea) => {
-      updateState({ areas: [newArea] });
+      let finalArea = { ...newArea };
+      if (mode === "window-bound" && currentApp?.bounds) {
+        finalArea = {
+          ...finalArea,
+          relX: newArea.x - currentApp.bounds.x,
+          relY: newArea.y - currentApp.bounds.y,
+        };
+      }
+      updateActiveProfile({ areas: [finalArea] });
     },
-    [updateState],
+    [mode, currentApp?.bounds, updateActiveProfile],
   );
 
   const handleHoverControlChange = useCallback((isOver) => {
@@ -227,50 +395,58 @@ function App() {
     }
   }, []);
 
-  const hasReachedLimit = state.areas.length >= MAX_FOCUS_AREAS;
-
-  if (!state.enabled) {
+  // ── When not visible for the current window, render nothing! ────────────────
+  if (!isVisible || !activeProfile) {
     return null;
   }
+
+  const hasReachedLimit = (activeProfile.areas || []).length >= MAX_FOCUS_AREAS;
 
   return (
     <div className="focusmask-desktop-container">
       {/* Floating Toolbar */}
       <Toolbar
         visible={true}
-        enabled={state.enabled}
-        drawMode={state.drawMode}
-        blur={state.blur}
-        darkness={state.darkness}
-        blockInteraction={state.blockInteraction}
+        enabled={enabled}
+        drawMode={drawMode}
+        blur={activeProfile.blur}
+        darkness={activeProfile.darkness}
+        blockInteraction={activeProfile.blockInteraction}
         hasReachedLimit={hasReachedLimit}
-        maskActive={state.maskActive}
-        onToggleMaskActive={() => updateState({ maskActive: !state.maskActive })}
-        onToggleDrawMode={() => updateState({ drawMode: !state.drawMode })}
-        onClear={() => updateState({ areas: [] })}
-        onBlurChange={(val) => updateState({ blur: val })}
-        onDarknessChange={(val) => updateState({ darkness: val })}
-        onBlockChange={(val) => updateState({ blockInteraction: val })}
+        maskActive={activeProfile.maskActive}
+        windowMode={mode}
+        targetWindow={currentApp}
+        targetWindowFocused={true}
+        onToggleMaskActive={() =>
+          updateActiveProfile({ maskActive: !activeProfile.maskActive })
+        }
+        onToggleDrawMode={() => setDrawMode((prev) => !prev)}
+        onClear={() => updateActiveProfile({ areas: [] })}
+        onBlurChange={(val) => updateActiveProfile({ blur: val })}
+        onDarknessChange={(val) => updateActiveProfile({ darkness: val })}
+        onBlockChange={(val) => updateActiveProfile({ blockInteraction: val })}
         onHoverToolbar={handleHoverControlChange}
+        onLockToWindow={handleLockToWindow}
+        onUnlockWindow={handleUnlockWindow}
       />
 
-      {/* Mask Overlay (Blur & SVG Cutout) */}
-      {state.maskActive && (
+      {/* Mask Overlay (Blur, Darkness & SVG Cutout) */}
+      {activeProfile.maskActive && (
         <MaskOverlay
-          areas={state.areas}
+          areas={screenAreas}
           previewArea={currentRect}
-          blur={state.blur}
-          darkness={state.darkness}
+          blur={activeProfile.blur}
+          darkness={activeProfile.darkness}
           onRemoveArea={handleRemoveArea}
           onResizeArea={handleResizeArea}
-          blockInteraction={state.blockInteraction}
+          blockInteraction={activeProfile.blockInteraction}
           onHoverControlChange={handleHoverControlChange}
         />
       )}
 
       {/* Drawing Interaction Layer */}
       <DrawingArea
-        active={state.drawMode}
+        active={drawMode}
         currentRect={currentRect}
         onStartDrawing={handleStartDrawing}
         onDraw={handleDraw}
