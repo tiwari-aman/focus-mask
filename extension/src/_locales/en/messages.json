@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Focus Mask - Reading Mode and Deep Work",
+    "description": "The name of the extension"
+  },
+  "appShortName": {
+    "message": "Focus Mask",
+    "description": "Short name for the extension"
+  },
+  "appDescription": {
+    "message": "Boost concentration by blurring distractions. The ultimate reading mode tool to focus on what matters on any webpage.",
+    "description": "The description of the extension"
+  }
+}
